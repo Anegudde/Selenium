@@ -1,0 +1,35 @@
+http://www.guru99.com/locators-in-selenium-ide.html
+http://selenium-training.israelekpo.com/targeting-elements.txt
+http://www.w3.org/TR/CSS2/selector.html#pattern-matching
+
+ID   							id=id of the element															id=email
+Name							name=name of the element   or name=name_of_the_element filter=value_of_filter	name=username /name=tripType value=oneway
+Link Text						link=link_text																	link=REGISTER
+CSS Selector	
+	  Tag and ID					css=tag#id																	css=input#email
+	  Tag and class					css=tag.class																css=input.inputtext
+	  Tag and attribute				css=tag[attribute=value]													css=input[name=lastName]
+	  Tag, class, and attribute		css=tag.class[attribute=value]												css=input.inputtext[tabindex=1]
+	  Inner text					css=tag:contains("inner text")
+DOM (Document Object Model)		
+	  getElementById				document.getElementById("id of the element")
+	  getElementsByName				document.getElementsByName("name")[index]
+	  dom:name						document.forms["name of the form"].elements["name of the element"]
+	  dom:index						document.forms[index of the form].elements[index of the element]
+XPath								
+
+verifyElementPresent
+verifyElementNotPresent
+verifyTextPresent
+verifyTextNotPresent
+verifyElementPositionLeft
+verifyElementPositionTop
+clickAndWait
+typeAndWait
+selectAndWait
+waitForTitle
+waitForTextPresent
+waitForAlert
+
+
+SelectWindow

@@ -1,0 +1,230 @@
+#!/usr/bin/perl
+=cut;
+********************************************************************************
+#Description: Check for Description and Testcase Match from 
+#Singularity table
+#
+#Author: Vikram
+#
+#Revision history
+********************************************************************************
+#rev.no	 Name	  Date 		Description
+#0.1 	Vikram 	24 July 14	Generate the IRT/ST from the Objective Sections
+********************************************************************************
+=cut;
+package Checklist;
+#use strict;
+#use warnings;
+use File::Find qw(find);
+use Test;
+use IO::Handle;
+use Benchmark qw/cmpthese timethese/;
+use Data::Dumper;
+use List::Util 'first'; 
+
+my @ListTestcases =();
+my @Testcase =();
+my %hash =();
+my %TestcaseIRT=();
+my %TestcaseST=();
+
+my @objfiles;
+
+my @Rule =qw/Min Max Zero/;
+my @Singularity = qw/N+1 N N Singularity/;
+
+
+#enter the directory path 
+my $dir_path;
+my $filename;
+my @file_name_arr="";
+my $dirname;
+
+print ("enter the directory path where the files are present\n"); 
+$dir_path = <STDIN>;
+
+chomp($dir_path);
+#opens the directory 
+opendir( TD, $dir_path ) || die("cannot open directory");
+#perfom for all the files in the directory.
+while($filename = readdir(TD))
+{
+    #List all Files but pick only TCF Files 
+    @file_name_arr = split(/\./, $filename);
+	if ( $file_name_arr[1] eq "tcf" )
+    { 
+        undef @ListTestcases;
+        undef @objfiles;
+        undef %hash;
+        undef @Testcase;
+        undef %TestcaseIRT;
+        undef %TestcaseST;
+        open(OUTFILE,">",$dirname.$filename."csv") or die $!;
+        # Change the Filehandle to redirect Console Output.
+        STDOUT->fdopen( \*OUTFILE, 'w' ) or die $!;     
+        &ListTestcases;  # Parse and Create an Array for the Total Number of testcases
+            foreach my $t (@ListTestcases)
+            {
+                #Parse the Test Sections to generate the KVP
+                &ParseTestSections($t);
+
+            }
+            foreach my $t (@ListTestcases)
+            {
+                #Parse the Individual testcases t
+                &ParseObjectiveList('M2');
+            }            
+        &GenerateIRT;
+        close(OUTFILE);      # close the OUTFILE per file
+    }   # End of the If Loop
+
+}
+closedir(TD);
+
+
+sub ListTestcases
+{
+#opens the file inside the dir
+open(FP,"$dir_path/$filename")or die( "cannot open the file:$filename\n");
+#print "\n".$dir_path.$filename."-----------------\n";
+#my $TCFFile = $filename;
+while (<FP>)	
+{
+if ( s/ Description = TEST//ig) 
+    {
+     my $str=$_; 
+     $str =~ s/^\s+|\s+$//g ;
+     push (@ListTestcases, $str);  
+    }
+}
+close(FP);
+}    
+
+sub ParseTestSections
+{
+    #opens the file inside the dir
+    open(FP,"$dir_path/$filename")or die( "cannot open the file:$filename\n");
+    #print "\n".$dir_path.$filename."-----------------\n";
+    my $buffer =();
+    my $testcase =();
+    my $TestNumber = "";
+    $TestNumber = $_[0];  # Prepare this Array for the testcase
+    $TestNumber =~ s/^\s+|\s+$//g ; #remove spaces and Trim the values
+    while (<FP>)	
+    {          
+    if(m/Description = TEST $TestNumber/i)
+        {            
+            while(<FP>) 
+            {             
+             #$_ =~ s/[\x0A\x0D]//g; # to Strip lines of Extra Characters
+             $testcase .=$_ ;                          
+             if (m/Control Flow/i)
+              { last;}
+            }
+            push (@objfiles,$testcase);
+        }        
+    }  
+    $Testcase[$testcase][0] =$TestNumber;
+    $Testcase[$testcase][1] =$testcase; 
+    $Testcase[$testcase][2] =@objfiles;
+    
+    #create the Multi Dimensional Array here
+=cut;
+     my $match = grep $_, @Rule;
+     if ($match)
+     {
+        my ($Singularity, $Attribute) = split(" ", $_);                 
+        $hash{$Attribute} =[$testcase,$Singularity];
+     }   
+         foreach my $b (@ListTestcases)
+    {
+        $Testcase[$b][0] =$b;
+        $Testcase[$b][1] =%hash; 
+    }
+    #print Dumper(@objfiles);
+=cut;  
+    #print Dumper(@Testcase);
+close(FP);    # Close the opened TCF
+}
+
+# for each testcase parse and Fill the details in a Multi Dimensional Array
+sub ParseObjectiveList
+{
+local $testNo = $_[0];
+$testNo =~ s/^\s+|\s+$//g ; #remove spaces and Trim the values
+    foreach my $t ($Testcase)
+    {
+        if ($Testcase[$t][0] eq $testNo)
+        {            
+            my @lines = split($Testcase[$testNo][1],"\r\n" );
+            print Dumper (@lines);
+            foreach my $objective (@lines)
+            {                 
+                if ($objective =~ m/To Verify/i)
+                {
+                  #parse the Input and Attributes depending on type of Condition.      
+                  # Here if this is a Input Range table
+                  if (grep $objective, @Rule)
+                  {
+                      print ("Rule Found");print $objective;
+                  }
+                  # Here if this is a Singularity
+                  if (grep $objective, @Singularity)
+                  {
+                      print ("Singularity Found"); print $objective;
+                  }
+                }
+            }
+        }      
+    } # end of intitial for loop for the Array Object
+}
+
+# Recursively run on each Line/Objective and get the Inputs and Objectives
+sub LineSplitter
+{
+my $line = $_[0];    
+my $IRT = $_[1];
+my $ST = $_[2];
+my @LineObject ='';
+    if ($IRT)
+    {
+        if ($line =~ m/\r\n/i)
+        {
+        @LineObject = split /[',"," "]/,$line;
+        }
+    }
+    if ($ST)
+    {
+        if ($line =~ m/\r\n/i)
+        {
+        @LineObject = split /[',"," "]/,$line;
+        }
+    }
+}
+
+#Generate the Input Range Report here
+sub GenerateIRT
+{
+ foreach my $InputIRT (sort keys %TestcaseIRT)
+    {
+     foreach my $AttributeIRT (sort keys $TestcaseIRT{$InputIRT})
+        {
+            print $InputIRT."|".$AttributeIRT."|".$TestcaseIRT{$InputIRT}{$AttributeIRT}."\n";
+        }        
+    }    
+}
+
+
+#Generate the Singularity Report here
+sub GenerateST
+{
+ foreach my $InputST (sort keys %TestcaseST)
+    {
+     foreach my $AttributeST (sort keys $TestcaseST{$InputST})
+        {
+            print $InputST."|".$AttributeST."|".$TestcaseST{$InputST}{$AttributeST}."\n";
+        }        
+    }    
+}
+
+# End of File

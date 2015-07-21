@@ -1,0 +1,36 @@
+Grid:http://localhost:4444/grid/console?config=true&configDebug=true
+http://www.tutorialspoint.com/selenium/selenium_grids.htm
+https://code.google.com/p/selenium/wiki/Grid2
+
+https://automationtestingsimplified.wordpress.com/2012/10/16/starting-with-selenium-grid/
+C:\Users\vikram.uk\workspace\Drivers> "C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -role hub
+									  "C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -hub  http://10.117.61.30:4444/grid/register -role rc -nodeConfig  Config.json
+Actual: java -jar selenium-server-standalone.jar -hub http://selgrid2.xxx.xxx.com:80 -role rc -hubConfig globalmedia_yselenium_rc_config.json
+
+"C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -role hub  http://10.117.61.30:4444/grid/register
+"C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -role node -hub http://localhost:4444/grid/register 
+"C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -role node -hub http://localhost:4444/grid/register  -port 4445
+
+
+XPI :http://release.seleniumhq.org/selenium-ide/2.9.0/
+https://tott-meetup.readthedocs.org/en/latest/sessions/behave.html
+Book:   http://www.wiley.com/WileyCDA/WileyTitle/productCd-1118901223.html
+
+Best:
+http://howtodoinjava.com/2014/12/03/how-to-execute-testng-tests-with-maven-build/
+http://examples.javacodegeeks.com/enterprise-java/testng/testng-maven-project-example/
+http://3qilabs.com/best-practices-for-watir-and-selenium-locators-the-locator-tree-of-life/
+
+from behave.__main__ import main as behave_main
+behave_main("D:\\Books\\Selenium Testing Tools Cookbook\\Python\\BDD1\\Feature-Login.feature", '-t @run', '-k')
+
+https://weblogs.java.net/blog/johnsmart/archive/2014/04/22/using-bdd-web-services-tutorial-using-jbehave-and-thucydides
+
+Selenium: https://newcircle.com/bookshelf/selenium_tutorial/locatorsn
+
+Python:
+https://pythonhosted.org/behave/
+https://testingbot.com/support/getting-started/behave.html
+https://code.google.com/p/selenium/wiki/Grid2
+https://selenium.googlecode.com/svn/trunk/docs/api/py/index.html
+https://jenisys.github.io/behave.example/step_matcher/using_matchers.html
