@@ -1,6 +1,8 @@
 Grid:http://localhost:4444/grid/console?config=true&configDebug=true
 http://www.tutorialspoint.com/selenium/selenium_grids.htm
 https://code.google.com/p/selenium/wiki/Grid2
+https://techblog.polteq.com/en/run-your-selenium-tests-in-the-cloud-with-testingbot/
+
 
 https://automationtestingsimplified.wordpress.com/2012/10/16/starting-with-selenium-grid/
 C:\Users\vikram.uk\workspace\Drivers> "C:\Program Files\Java\jre1.8.0_45\bin\java" -jar selenium-server-standalone-2.39.0.jar  -role hub
@@ -25,7 +27,7 @@ from behave.__main__ import main as behave_main
 behave_main("D:\\Books\\Selenium Testing Tools Cookbook\\Python\\BDD1\\Feature-Login.feature", '-t @run', '-k')
 
 https://weblogs.java.net/blog/johnsmart/archive/2014/04/22/using-bdd-web-services-tutorial-using-jbehave-and-thucydides
-
+http://www.seleniumframework.com/cucumber-2/make-a-case/why-cucumber/
 Selenium: https://newcircle.com/bookshelf/selenium_tutorial/locatorsn
 
 Python:
@@ -34,3 +36,7 @@ https://testingbot.com/support/getting-started/behave.html
 https://code.google.com/p/selenium/wiki/Grid2
 https://selenium.googlecode.com/svn/trunk/docs/api/py/index.html
 https://jenisys.github.io/behave.example/step_matcher/using_matchers.html
+
+
+Cucumber:
+http://alterhu.github.io/CucumberPeople/

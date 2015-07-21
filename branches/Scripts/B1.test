@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="https://www.google.co.in/" />
+<title>B1</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">B1</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/search?q=bangalore+one&amp;ie=utf-8&amp;oe=utf-8&amp;gws_rd=cr&amp;ei=x5yfVYiTNYSQuATxyb_gCw</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Reliance</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>xpath=(//a[contains(text(),'Login')])[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=txtUserId</td>
+	<td>test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=password</td>
+	<td>test</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Register</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=userIdTxt</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnAvailability</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=userIdTxt</td>
+	<td>Test123456</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnAvailability</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=userIdTxt</td>
+	<td>Testramana</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnAvailability</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=pwdTxt</td>
+	<td>123456</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=rePwdTxt</td>
+	<td>123456</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=Bangalore One</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

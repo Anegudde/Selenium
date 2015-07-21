@@ -1,0 +1,25 @@
+TestNG
+http://javabeginnerstutorial.com/testng/testng-tutorial-beginners/
+
+LoadTesting TestNG
+https://www.mkyong.com/unittest/testng-selenium-load-testing-example/
+
+Maven to Jenkins
+http://www.guru99.com/maven-jenkins-with-selenium-complete-tutorial.html
+
+BDD with Cucumber
+http://www.hascode.com/2014/12/bdd-testing-with-cucumber-java-and-junit/
+http://www.hascode.com/2015/01/performance-testing-a-multiuser-web-application-with-jmeter-and-maven/
+http://www.toolsqa.com/cucumber/options/
+Cheat Sheet for Cucumber:
+http://35qk152ejao6mi5pan29erbr9.wpengine.netdna-cdn.com/wp-content/uploads/2011/08/Cucumber-Regular-Expressions-Cheat-Sheet.pdf
+
+https://www.packtpub.com/books/content/first-steps-selenium-rc
+Firefox:java –jar selenium-server.jar –htmlsuite*iexplore     http://book.theautomatedtester.co.uk c:\path\to\testsuite.html c:\path\to\result.html 
+IE:     java –jar selenium-server.jar –htmlsuite*iexplore     http://book.theautomatedtester.co.uk c:\path\to\testsuite.html c:\path\to\result.html 
+Chrome: java –jar selenium-server.jar –htmlsuite*googlechrome http://book.theautomatedtester.co.uk c:\path\to\testsuite.html c:\path\to\result.html  
+
+
+Grid:https://www.packtpub.com/books/content/getting-started-selenium-grid
+ant –Dport=9999 –DhubURL=http://nameofmachine:port –Dhost=nameofcurrentmachine launch-remote-control.
+ant –Dport=9998 –DhubURL=addressofhub –Dhost=nameofremotehost –Denvironment="IE on Windows" launch-remote-control.
