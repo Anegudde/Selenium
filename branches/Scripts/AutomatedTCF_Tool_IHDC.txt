@@ -1,0 +1,2873 @@
+
+
+
+#http://osix.net/modules/article/?id=115
+
+
+
+# use strict; 
+ use Tk; 
+ use Tk::DialogBox;
+ use Tk::Dialog ;
+ use Tk::Button ;
+ use Tk::Frame;
+ use Tk::TextUndo;
+ use Tk::Text;
+ use Tk::Scrollbar;
+ use Tk::Menu;
+ use Tk::Menubutton;
+ use Tk::Listbox;
+ use Win32::Process;
+ use Tk::Font;
+ use File::Basename;
+ use Data::Dumper;
+ use Win32;
+ use Tk::Balloon;
+ use Tk::NoteBook;
+use Win32::OLE qw(in with);
+use Win32::OLE::Const 'Microsoft Excel';
+use Win32::OLE::Variant;
+$Win32::OLE::Warn = 3;
+
+my $Excel = Win32::OLE->GetActiveObject('Excel.Application') ||
+Win32::OLE->new('Excel.Application', 'Quit');
+
+#BEGIN {
+#if ($^O eq 'MSWin32') {
+#require Win32::Console;
+#Win32::Console::Free( );
+#}}
+
+
+{   ###########################################################################
+    package TextHighlight;
+    ###########################################################################
+
+
+    use vars qw($VERSION %FUNC %FLOW %OPER);
+    $VERSION = '1.0';
+
+    my @FUNC = qw/AUTOLOAD BEGIN CHECK CORE DESTROY END INIT abs accept alarm atan2 bind binmode bless caller chdir chmod chomp chop chown chr chroot close closedir cmp connect cos crypt dbmclose dbmopen defined delete die dump each endgrent endhostent endnetent endprotoent endpwent endservent eof eval exec exists exit exp fcntl fileno flock fork format formline getc getgrent getgrgid getgrnam gethostbyaddr gethostbyname gethostent getlogin getnetbyaddr getnetbyname getnetent getpeername getpgrp getppid getpriority getprotobyname getprotobynumber getprotoent getpwent getpwnam getpwuid getservbyname getservbyport getservent getsockname getsockopt glob gmtime grep hex index int ioctl join keys kill lc lcfirst length link listen localtime log lock lstat map mkdir msgctl msgget msgrcv msgsnd new oct open opendir ord pack pipe pop pos print printf prototype push quotemeta rand read readdir readline readlink readpipe recv ref rename reset reverse rewinddir rindex rmdir scalar seek seekdir select semctl semget semop send setgrent sethostent setnetent setpgrp setpriority setprotoent setpwent setservent setsockopt shift shmctl shmget shmread shmwrite shutdown sin sleep socket socketpair sort splice split sprintf sqrt srand stat study substr symlink syscall sysopen sysread sysseek system syswrite tell telldir tie tied time times truncate uc ucfirst umask undef unlink unpack unshift untie utime values vec wait waitpid wantarray warn write Initialization:/;
+    my @FLOW = qw/continue do else elsif for foreach goto if last local my next our no package redo require return sub unless until use while Testplan __DATA__ __END__ __FILE__ __LINE__ __PACKAGE__/;
+    my @OPER = qw/and eq ge gt le lt m ne not or q qq qr qw qx s tr y xor Initialization: Expected Outputs: Initialization of Output Variables : Name = Decl_type = Usage = Value = Requirements: Objectives: Control Flow: Input Table Singularity Table Where Please Wait..x/;
+    
+    
+    # Build lookup tables
+    @FUNC{@FUNC} = (1) x @FUNC; undef @FUNC;
+    @FLOW{@FLOW} = (1) x @FLOW; undef @FLOW;
+    @OPER{@OPER} = (1) x @OPER; undef @OPER;
+    
+    use Tk qw(Ev);
+    use AutoLoader;
+
+    # Set @TextHighlight::ISA = ('Tk::TextUndo')
+    use base qw(Tk::TextUndo);
+
+    Construct Tk::Widget 'TextHighlight';
+
+
+
+    sub InitObject {
+        my ($w, $args) = @_;
+        $w->SUPER::InitObject($args);
+        $w->tagConfigure('FUNC', -foreground => '#FF0000');
+        $w->tagConfigure('FLOW', -foreground => '#0000FF');
+        $w->tagConfigure('OPER', -foreground => '#FF8200');
+        $w->tagConfigure('STRG', -foreground => '#848284');
+        $w->tagConfigure('CMNT', -foreground => '#0000FF');
+        $w->tagConfigure('MTCH', -background => '#FFFF00');
+        # Default: font family courier, size 10
+        $w->configure(-font => $w->fontCreate(qw/-family courier -size 10/));
+        $w->{CALLBACK} = undef;
+        $w->{CHANGES} = 0;
+        $w->{LINE} = 0;
+    }
+
+
+
+
+    sub insert {
+        my $w = shift;
+        my ($s_line) = split(/\./, $w->index('insert'));
+        $w->SUPER::insert(@_);
+        my ($e_line) = split(/\./, $w->index('insert'));
+        highlight($w, $s_line, $e_line);
+        &{$w->{CALLBACK}} if ( defined $w->{CALLBACK} );
+    }
+
+    # Insert text without highlight
+    sub insertWHL {
+        my $w = shift;
+        $w->SUPER::insert(@_);
+    }
+
+    # Background highlight
+    sub backgroundHL {
+        my ($w, $l) = @_;
+        my ($end) = split(/\./, $w->index('end'));
+        $w->{LINE} = $end unless ( $w->{LINE} );
+        # 'cut/delete' correction if needed
+        if ( $w->{LINE} != $end ) {
+            $l -= ($w->{LINE} - $end);
+            if ( $l < 0 ) { $l = 0 }
+            $w->{LINE} = $end;
+        }
+        highlight($w, $l, $l+50 > $end ? $end-1 : $l+50);
+        if ( $l+50 < $end ) {
+            $w->after(50, [\&backgroundHL, $w, $l+50+1]);
+        }
+        else { $w->{LINE} = 0 }
+    }
+
+    sub InsertKeypress {
+        my $w = shift;
+        $w->SUPER::InsertKeypress(@_);
+
+        # Easy things easy...
+        if ( $_[0] =~ /[([{<"']/ ) {
+            $w->SUPER::InsertKeypress(')') if ( $_[0] eq '(' );
+            $w->SUPER::InsertKeypress(']') if ( $_[0] eq '[' );
+            $w->SUPER::InsertKeypress('}') if ( $_[0] eq '{' );
+            $w->SUPER::InsertKeypress('>') if ( $_[0] eq '<' );
+            $w->SUPER::InsertKeypress('"') if ( $_[0] eq '"' );
+            $w->SUPER::InsertKeypress("'") if ( $_[0] eq "'" );
+            $w->SetCursor('insert-1c');
+        }
+
+        my ($line) = split(/\./, $w->index('insert'));
+        highlight($w, $line, $line);
+        &{$w->{CALLBACK}} if ( defined $w->{CALLBACK} );
+    }
+
+    sub highlight {
+        my ($w, $s_line, $e_line) = @_;
+
+        # Remove tags from current area
+        foreach ( qw/FUNC FLOW OPER STRG CMNT/ ) {
+            $w->tagRemove($_, $s_line.'.0', $e_line.'.end');
+        }
+
+        foreach my $ln($s_line .. $e_line) {
+            my $line = $w->get($ln.'.0', $ln.'.end');
+            # Highlight: strings
+            while ( $line =~ /("             # Start at double quote
+                                  (?:        # For grouping only
+                                      \\.|   # Backslash with any character
+                                      [^"\\] # Must not be able to find
+                                  )*         # Zero or more sets of those
+                              "|
+                              (?<!\$)        # Prevent $' match
+                              '              # Start at single quote
+                                  (?:        # For grouping only
+                                      \\.|   # Backslash with any character
+                                      [^'\\] # Must not be able to find
+                                  )*         # Zero or more sets of those
+                              ')/gx ) {
+                $w->tagAdd('STRG', $ln.'.'.(pos($line)-length($1)),
+                           $ln.'.'.pos($line));
+            }
+            # Highlight: comments
+            while ( $line =~ /(?<!       # Lookbehind for neither
+                                  [\$\\] # $ nor \
+                              )\#        # Start of the comment
+                             /gx ) {
+                next if ( $w->tagNames($ln.'.'.(pos($line)-1)) &&
+                          $w->tagNames($ln.'.'.(pos($line)-1)) eq 'STRG' );
+                $w->tagAdd('CMNT', $ln.'.'.(pos($line)-1), $ln.'.end');
+                $line = $w->get($ln.'.0', $ln.'.'.(pos($line)-1));
+                last;
+            }
+            # Highlight: functions, flow control words and operators,
+            # do not highlight hashes, arrays or scalars
+            while ( $line =~ /(?<!              # Lookbehind for neither
+                                  [\%\@\$])     # %, @, nor $
+                                      \b        # Match a word boundary
+                                          (\w+) # Match a "word"
+                                      \b        # Match a word boundary
+                             /gx ) {
+                if ( $OPER{$1} ) {
+                    $w->tagAdd('OPER', $ln.'.'.(pos($line)-length($1)),
+                               $ln.'.'.pos($line));
+                }
+                elsif ( $FLOW{$1} ) {
+                    $w->tagAdd('FLOW', $ln.'.'.(pos($line)-length($1)),
+                               $ln.'.'.pos($line));
+                }
+                elsif ( $FUNC{$1} || $1 =~ /^(\d+)$/ ) {
+                    $w->tagAdd('FUNC', $ln.'.'.(pos($line)-length($1)),
+                               $ln.'.'.pos($line));
+                }
+            }
+        }
+    }
+} # END - package TextHighlight
+
+my $ver = "Automated_TCFTool Version 2.0(With GUI)";
+
+
+my ($infile) = ();
+
+ my $mw = MainWindow->new(); 
+ 
+
+ 
+  # Create balloon widget
+  my $b = $mw->Balloon();
+
+
+  $mw->configure(-background=>'skyblue',-foreground=>'white'); 
+  
+
+  
+$mw->title("Automated_TCFTool Version 2.0"); 
+  
+
+#  $mw->minsize(qw(800 500)); 
+
+$mw->minsize(qw(970 750)); 
+
+  $mw->maxsize(qw(970 750)); 
+
+# $mw->geometry('+15+10'); 
+ 
+  $mw->geometry('+150+100'); 
+
+#$mw->geometry('+320+240'); 
+
+#$mw->geometry("300*450+0+0"); 
+  
+  
+#----------------------------- Left Side------------------------------------------------------------#  
+
+  
+   
+  my $output_frame = $mw->Frame()->place(-x => 40, -y => 200);
+
+#  my $output_frame = $mw->Frame()->pack(-expand => 1, -side => "left",-anchor =>  'w',-padx => "1c",-pady => "4c");
+  
+  my $output_scroll = $output_frame->Scrollbar();
+  
+  my $output_text = $output_frame->TextHighlight(-yscrollcommand => ['set', $output_scroll],-height => '31',-width => '53');
+  
+  $output_scroll->configure(-command => ['yview', $output_text]);
+  
+  $output_scroll->pack(-side => "right", -expand => "Yes", -fill => "y");
+  
+  $output_text->pack();
+
+
+  tie *STDOUT, ref $output_text, $output_text;
+  
+#----------------------------- Right Side------------------------------------------------------------#  
+  
+
+   
+my $output_text1 = $mw -> Scrolled("TextHighlight",-scrollbars=>'e',-height => 31,-width => 53)->place(-x => 486, -y => 200);
+
+    
+    
+#  tie *STDOUT, ref $output_text1, $output_text1;
+  
+  tie(*TEXT, 'Tk::Text', $output_text1);
+
+
+#--------------------#File Menu-----------------------------------------------------#
+
+    my $menu = $mw->Menu(-type => 'menubar');
+   
+    $mw->configure(-menu => $menu,-background=>'lightblue');
+
+    my $file = $menu->cascade(-label => '~File', -tearoff => 0);
+    
+      $file->command( -label => '~New',-background=>'lightblue', -command => \&newCommand,-accelerator =>"Ctrl+N");
+      
+      $file->command(-label => '~Open Excel Sheet/TCF ...',-background=>'lightblue', -command => [\&fileDialog, $mw, "open"]);
+      
+      $file->command(-label => 'E~xit',-background=>'lightblue',-accelerator =>"Ctrl+Q",-command => sub { exit });
+
+
+
+  my $Converter = $menu->cascade(-label => '~Converter', -tearoff => 0);
+
+   $Converter->command( -label => '~Convert to TCF',-background=>'lightblue', -command => \&Convert,-accelerator =>"Ctrl+T");
+
+  my $Converter1 = $menu->cascade(-label => '~RemovedVariables', -tearoff => 0);
+
+   $Converter1->command( -label => '~Removed Variables',-background=>'lightblue', -command => \&Convert1);
+
+  my $Validate_menu = $menu->cascade(-label => '~ValidateTCF', -tearoff => 0);
+
+   $Validate_menu->command( -label => '~Validate TCF',-background=>'lightblue', -command => \&validate);
+
+
+#--------------------#About Menu-----------------------------------------------------#
+
+my $About_menu = $menu->cascade(-label => "About", -underline => 0, -tearoff => 0);
+
+
+$About_menu->command(-label => "Version",-background=>'lightblue', -underline => 0,
+                    -command => sub{$mw->messageBox(-message => "Version: $ver",
+                                                    -type => "ok")});
+                                                   
+                                                    
+$About_menu->command(-label => "About Authors",-background=>'lightblue', -underline => 0, -command => \&aboutDialog);
+
+$About_menu->command(-label => "Supporting Team",-background=>'lightblue', -underline => 0, -command => \&aboutDialog2);
+
+#--------------------#Help Menu-----------------------------------------------------#
+
+my $help_menu = $menu->cascade(-label => "Help", -underline => 0, -tearoff => 0);
+
+
+#$help_menu->command(-label => "Version", -underline => 0,-command => sub{$mw->messageBox(-message => "Version: $ver",                               -type => "ok")});
+                                                   
+                                                    
+$help_menu->command(-label => "Help", -underline => 0, -command => \&ReadMe);
+
+
+
+
+
+
+################################ construction
+
+######### bindings 
+# menu shortcuts
+
+$mw->bind("<Control-n>" => \&newCommand );
+#$mw->bind("<Control-e>" => \&fileDialog);
+$mw->bind("<Control-t>" => \&Convert);
+#$mw->bind("<Control-t>" => \&validate);
+
+$mw->bind("<Control-q>" => sub { exit } );
+$mw->protocol('WM_DELETE_WINDOW', sub { exit });
+
+
+
+
+#--------------------#HeaderLable -----------------------------------------------------#
+
+my $greeting_frame = $mw->Frame()->pack(-side => "top");
+
+$greeting_frame->Label(-text => "Automated TCF Tool",-background=>'lightblue',-foreground=>'purple',-font => [-family => 'Imprint MT Shadow', -size => 16, -weight => 'bold',])->pack();
+
+$b->attach($greeting_frame, -msg => "Automated_TCFTool Version 2.0 designed by Bhaskar Reddy and Vaitheeswaran");
+
+
+
+#--------------------#StatusLable -----------------------------------------------------#
+
+
+
+
+
+  
+
+#--------------------#Convert_excel -----------------------------------------------------#
+   
+   
+my $open = $mw->Button(-text => "Open",-background=>'lightblue',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '1',-width => '7', -command => [\&fileDialog, $mw, "open"])->place(-x => 100, -y => 80);
+
+$b->attach($open, -msg => "Please Open the Excel Sheet or TCF");
+            
+my $convert = $mw->Button(-text => "Convert to TCF",-background=>'grey',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '1',-width => '15',-command =>\&Convert )->place(-x => 180, -y => 80);
+            
+$b->attach($convert, -msg => "Convert Excel Sheet to TCF file for LDRA Tool");
+
+$convert->configure(-state=>'disabled');
+
+
+#--------------------#Removed Variables -----------------------------------------------------#
+
+             
+my $convert1 = $mw->Button(-text => "Removed Variables",-background=>'grey',-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '1',-width => '15', -command => \&Convert1)->place(-x => 180, -y => 30);
+
+$b->attach($convert1, -msg => "Delete Remove variables from Exported TCF file from LDRA");
+
+$convert1->configure(-state=>'disabled');
+
+#--------------------#Validate -----------------------------------------------------#
+
+my $validate = $mw->Button(-text => "Validate TCF",-background=>'grey',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '1',-width => '15',-command =>\&validate )->place(-x => 180, -y => 130);
+
+$b->attach($validate, -msg => "Validate TCF file");
+
+$validate->configure(-state=>'disabled');
+
+
+#--------------------#Exit -----------------------------------------------------#
+
+
+my $exit = $mw->Button(-text => "Exit",-background=>'lightblue',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '2',-width => '10', -command => sub { exit })->place(-x => 350, -y => 80);
+
+
+#--------------------# Read Me -----------------------------------------------------#
+
+
+my $ReadMe = $mw->Button(-text => "Help",-background=>'lightblue',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '2',-width => '10', -command => \&ReadMe)->place(-x => 450, -y => 80);
+
+$b->attach($ReadMe, -msg => "For Assistance and guidelines");
+
+
+
+#--------------------# Status Labels -----------------------------------------------------#
+
+
+my $status = $mw->Label(-textvariable => \$info, -relief => 'ridge')->
+  pack(-side => 'bottom', -fill => 'x');
+
+$b->attach($status, -msg => "Status of opening and conversion");
+
+
+my $left_preview = $mw->Label(-text => "                                              Status of Excel Sheet                                                            ", 
+-relief => 'ridge',-background=>'lightblue',-foreground=>'blue',-font => [-family => 'Calibri (Body)',
+-size => 9, -weight => 'bold',])->place(-x => 40, -y => 180);
+
+$b->attach($left_preview, -msg => "Leftside text window is Status of Excel Sheet");
+
+my $right_preview = $mw->Label(-text => "                                Preview of TCF/Validate/Removed Variable files                          ", 
+-relief => 'ridge',-background=>'lightblue',-foreground=>'blue',-font => [-family => 'Calibri (Body)',
+-size => 9, -weight => 'bold',])->place(-x => 485, -y => 180);
+ 
+$b->attach($right_preview, -msg => "Rightside text window is Preview of TCF/Validate/Removed Variable files");
+
+
+#my $greeting_frame1=$mw->Label(-text => "HCL",-background=>'lightblue',-foreground=>'blue',-font => [-family => 'Eras Bold ITC', -size => 20, -weight => 'bold',-slant =>"italic"])->place(-x => 30, -y => 0);
+
+#$b->attach($greeting_frame1, -msg => "HCL Technologies");
+
+#my $greeting_frame2=$mw->Label(-text => "Kidde Team",-background=>'lightblue',-foreground=>'purple',-font => [-family => 'Monotype Corsiva', -size => 20, -weight => 'bold',-slant =>"italic"])->place(-x => 800, -y => 0);
+
+#$b->attach($greeting_frame2, -msg => "The Rocks of Kidde Team Members....");
+ 
+ 
+
+sub aboutDialog {
+    my $popup = $mw->Dialog(
+        -popover        => $mw,-background=>'lightblue',
+        -title          => 'About Automated TCF Tool',
+        -default_button => 'OK',
+        -buttons        => ['OK'],
+        -text           => "Automated TCF Tool\nVersion 2.0 - 15-Feb-2009\n\n".
+                           "Copyright (C) Bhaskar Reddy\n".
+                           "Copyright (C) Vaitheeswaran\n".
+                           "Designed/Developed by Bhaskar Reddy\n".
+                           "and Vaitheeswaran",
+        );
+    $popup->resizable('no', 'no');
+    $popup->Show();
+}
+
+sub aboutDialog1 {
+    my $popup1 = $mw->Dialog(
+        -popover        => $mw,-background=>'lightblue',
+        -title          => 'About Kidde Team',
+        -default_button => 'OK',
+        -buttons        => ['OK'],
+        -text           => "HCL_Kidde is a great team(The rocks of Hardworkers and genius)\n\n".
+                           "Thanks to entire Kidde Team for their Marvellous Support",
+                         
+        );
+    $popup1->resizable('no', 'no');
+    $popup1->Show();
+}
+
+sub aboutDialog2 {
+    my $popup2 = $mw->Dialog(
+        -popover        => $mw,-background=>'lightblue',
+        -title          => 'About Kidde Team',
+        -default_button => 'OK',
+        -buttons        => ['OK'],
+        -text           => "Greatful Thanks to Mr.Ashly and Mr Velpuru Venkata Swamy for their Marvellous Support\n\n".
+                           "Thanks to entire Kidde Team for their awesome Support",
+                         
+        );
+    $popup2->resizable('no', 'no');
+    $popup2->Show();
+}
+
+
+
+
+
+if ($^O eq 'MSWin32') {
+    my $syst = $menu->cascade(-label => '~System');
+    my $dir = 'dir | sort | more';
+    $syst->command(
+        -label   => $dir,
+        -command => sub {system $dir},
+    );
+}
+
+
+            
+ 
+ MainLoop();
+ 
+
+#---------------------------- Excel Sheet------------------------------------- 
+
+sub Convert {
+ 
+ 
+
+         
+          if (defined $infile and $infile ne "") 
+          {
+          
+          $output_text1->delete("1.0", "end");
+
+#          my  $mw1 = MainWindow->new();
+#          $mw1->title("Automated_TCFTool Version 2.0");
+#          $mw1->minsize(qw(500 250)); 
+#          $mw1->maxsize(qw(500 250));   
+#          $mw1->geometry('+250+150'); 
+#          $mw1->Label(-text => "Have you checked the unused data in Merged Cells ???",-background=>'lightblue',-foreground=>'blue',-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',])->place(-x => 50, -y => 60);
+#          my $Yes = $mw1->Button(-text => "Yes",-background=>'lightblue',-state => "normal",-font => [-family => 'Calibri (Body)', -size => 10, -weight => 'bold',],-height => '1',-width => '10',
+#                    -command => sub { 
+#                                      if(defined $Yes eq "Yes")
+#                                      {
+#                                      fileDialog($mw, "Convert");
+#                                      }
+#                                      }
+#                                      )->place(-x => 150, -y => 100);
+
+            
+         fileDialog($mw, "Convert");   
+          
+          } else {
+          
+              printMessage("warning", "OK",
+                "You must open a file to Convert");
+              }
+        }
+
+#---------------------------- Removed Variables ------------------------------------- 
+
+sub Convert1 {
+ 
+ 
+
+         
+          if (defined $infile and $infile ne "") 
+          {
+          
+          $output_text1->delete("1.0", "end");
+
+            fileDialog($mw, "Convert1");
+            
+          
+          } else {
+          
+              printMessage("warning", "OK",
+                "You must open a file to Remove Removed Variables");
+              }
+        }
+
+
+
+#---------------------------- Validate ------------------------------------- 
+
+
+
+sub validate {
+ 
+ 
+
+         
+          if (defined $infile and $infile ne "") 
+          {
+          
+          $output_text1->delete("1.0", "end");
+
+            fileDialog($mw, "validate");
+            
+          
+          } else {
+          
+              printMessage("warning", "OK",
+                "You must open a file to Validate");
+              }
+        }
+ 
+
+#---------------------------- Open Files ------------------------------------- 
+ 
+sub fileDialog 
+
+{
+
+        
+
+  my ($w, $operation) = @_;
+  
+  my @types = (["All files", "*"],["Work Sheets", [qw/.xls/]],["TestCaseFiles", [qw/.tcf/]],["Text Files", [qw/.txt/]]);
+
+  #---------------------------- Excel Sheet Open------------------------------------- 
+
+  if ($operation eq "open") 
+  
+  {
+    
+
+
+    $info = "Opening file '$infile'...";   
+    
+      $infile = $w->getOpenFile(-filetypes => \@types);
+      
+         $output_text->delete("1.0", "end");      
+         $output_text1->delete("1.0", "end"); 
+          if (!open(FH, "$infile")) {
+          
+         $output_text->insert("end", "ERROR: Could not open Excel Sheet\n"); 
+         return; 
+          }
+          
+   $info = "File '$infile' Opened";
+   
+         if($infile =~ /(.*)\.xls/)
+             
+         {
+    
+         $convert->configure(-state=>'normal');
+
+          }
+
+
+       if($infile =~ /(.*)\.tcf/)
+             
+         {
+   
+   $convert->configure(-state=>'disabled');
+   $convert1->configure(-state=>'normal');
+   $validate->configure(-state=>'normal');
+   
+  } 
+
+}
+
+#-------------------------------------Convert-------------------------------------
+  if ($operation eq "Convert") 
+  
+  {
+  
+
+     	my $response = $mw -> messageBox(-message=>"Have you checked unused data in merged cells?????\n\nHave you Given Z (Instead of I) in the I/O section for Parameters???",-type=>'yesnocancel',-icon=>'question');
+
+      # MsgBox("Automated TCFTool", "Have you checked the junk data in merged cells?????\n\nHave you Given Z (Instead of I) in the I/O section for Parameters???", 64);
+      
+      if( $response eq "Yes" ) 
+      
+        {  
+   
+          $convert->configure(-state=>'disabled');
+          $open->configure(-state=>'disabled');
+
+          processfile();
+    
+          $info = "Converted to TCF";
+                
+          $open->configure(-state=>'normal');
+
+          
+       }
+       else
+     {
+       $mw->messageBox(-message=>"Please check the testplan and proceed further",-type=>'ok',-icon=>'info');
+     }
+  }
+#-------------------------------------Convert1-------------------------------------
+
+  if ($operation eq "Convert1") {
+  
+  
+    Removed();
+    
+      $info = "Succesfully deleted the Removed Variables";
+   
+ $convert1->configure(-state=>'disabled');
+  }
+
+
+#-------------------------------------Validate-------------------------------------
+
+  if ($operation eq "validate") {
+  
+  
+    validate_TCF();
+    
+      $info = "Validated the TCF";
+   
+   printMessage("info", "OK",
+                "Your TCF is successfully Validated");
+                
+ $validate->configure(-state=>'disabled');
+  }
+
+
+#-----------------------------------------------------------------------------------
+
+
+}    
+
+sub processfile
+{
+    
+      
+          my $Book = $Excel->Workbooks->Open("$infile");
+          
+    
+    
+         my $M=0;
+          my $tcf_file;
+            
+    if($infile =~ /(.*)\.xls/)
+     
+     {
+     
+             
+        $tcf_file = $1;
+       
+        $tcf_file=~ s/Testplan$/Testscript/g;
+              
+        open (TCF, ">$tcf_file.tcf");
+  
+     
+     my $sheet = $Book->Worksheets(1);
+     
+     
+     
+     
+open(OUTFILE,">123.tcf");
+
+open(VERSION2,">Version2.tcf");
+
+open(VERSION3,">Version3.tcf");
+
+ $a2=0;
+ $g2=0;
+ $CF=0;
+ my $c;
+ my $y;
+ my $a;
+ 
+print "\n****************VersionInfo*******************\n";
+
+for($c=1;$c<1000;$c++)
+
+{
+
+
+    print "$c Executing Testplan... Please Wait.. \n";
+     $output_text->update();
+      
+     $info = "$c Executing Please Wait...";
+     
+       $status->update();
+       
+     
+my $array = $sheet->Range("A$c")->{Value};
+
+my $array1 = $sheet->Range("B$c")->{Value};
+
+my $array2 = $sheet->Range("C$c")->{Value};
+
+my $array3 = $sheet->Range("D$c")->{Value};
+
+my $array4 = $sheet->Range("E$c")->{Value};
+
+my $array5 = $sheet->Range("F$c")->{Value};
+
+my $array6 = $sheet->Range("G$c")->{Value};
+
+
+               unless ((($sheet->Range("A$c")->{Value})||
+                        ($sheet->Range("B$c")->{Value})||
+                        ($sheet->Range("C$c")->{Value})||
+                        ($sheet->Range("D$c")->{Value})||
+                        ($sheet->Range("E$c")->{Value})||
+                        ($sheet->Range("F$c")->{Value})||
+                        ($sheet->Range("G$c")->{Value})))
+                        
+		        {
+		        $y++;
+		        
+		        if($y>10)
+		        {
+		        $c=1001;
+		        }
+		        next;
+		        }
+                    
+$y=0;      
+if((($array3 eq"Version")||($array3 eq"1")||($array3 eq"2")||($array3 eq"3")||($array3 eq"4")||($array3 eq"5")||($array3 eq"6")||($array3 eq"7")||($array3 eq"8")||($array3 eq"9")||($array3 eq"10")
+                         ||($array3 eq"11")||($array3 eq"12")||($array3 eq"13")||($array3 eq"14")||($array3 eq"15")||($array3 eq"16")||($array3 eq"17")||($array3 eq"18")||($array3 eq"19")||($array3 eq"20")
+                         ||($array3 eq"21")||($array3 eq"22")||($array3 eq"23")||($array3 eq"24")||($array3 eq"25")||($array3 eq"26")||($array3 eq"27")||($array3 eq"28")||($array3 eq"29")||($array3 eq"30")
+                         ||($array3 eq"31")||($array3 eq"32")||($array3 eq"33")||($array3 eq"34")||($array3 eq"35")||($array3 eq"36")||($array3 eq"37")||($array3 eq"38")||($array3 eq"39")||($array3 eq"40")
+                         ||($array3 eq"41")||($array3 eq"42")||($array3 eq"43")||($array3 eq"44")||($array3 eq"45")||($array3 eq"46")||($array3 eq"47")||($array3 eq"48")||($array3 eq"49")||($array3 eq"50")))
+ {
+$a1=length($array1);
+
+if($a1>$a2)
+{
+
+$a2=$a1;
+}
+
+}
+
+$g1=length($array2);
+if($g1>$g2)
+{
+
+$g2=$g1;
+
+}
+
+}
+
+$i=0;
+for($c=1;$c<1000;$c++)
+
+{
+
+    print "$c Executing Testplan... Please Wait.. \n";
+     $output_text->update();
+     
+     $info = "$c Executing Please Wait...";
+     
+       $status->update();
+     
+     
+my $array = $sheet->Range("A$c")->{Value};
+
+my $array1 = $sheet->Range("B$c")->{Value};
+
+my $array2 = $sheet->Range("C$c")->{Value};
+
+my $array3 = $sheet->Range("D$c")->{Value};
+
+my $array4 = $sheet->Range("E$c")->{Value};
+
+my $array5 = $sheet->Range("F$c")->{Value};
+
+my $array6 = $sheet->Range("G$c")->{Value};
+
+
+
+  
+
+
+
+               unless ((($sheet->Range("A$c")->{Value})||
+                        ($sheet->Range("B$c")->{Value})||
+                        ($sheet->Range("C$c")->{Value})||
+                        ($sheet->Range("D$c")->{Value})||
+                        ($sheet->Range("E$c")->{Value})||
+                        ($sheet->Range("F$c")->{Value})||
+                        ($sheet->Range("G$c")->{Value})))
+                        
+		        {
+		        $a++;		        
+		        if($a>10)
+		        {
+		        $c=1001;
+		        }
+		        next;
+		        }
+                       
+print OUTFILE "\n";
+ 
+$a=0;
+
+if(($array eq "Modules:")||($array eq "Modules")||($array eq "Modules :")||($M==1))
+{
+if($M==1)
+{
+#print "$array1\n";
+$Mod1=$Mod=$array1;
+@r=split(//,$Mod1);
+$w2=@r;
+for($j=0;$j<$w2-2;$j++)
+{
+@FMod[$j]=$r[$j];
+print VERSION2 ($r[$j]);
+}
+print VERSION2 ("\n");
+$M=10;
+}else
+{
+$M++;
+}
+}
+
+if(($array eq "Function:")||($array eq "Function")||($array eq "Function :"))
+{
+
+$Fun1=$Fun=$array1;
+@r1=split(//,$Fun1);
+$Num=@r1;
+for($j=0;$j<$Num-2;$j++)
+{
+@FF[$j]=$r1[$j];
+print VERSION2 ($r1[$j]);
+}
+print VERSION2 ("\n");
+
+}
+
+if(($array eq "Modules:")||($array eq "Modules")||($array eq "Modules :"))
+{
+print OUTFILE "$array";
+print OUTFILE "\n";
+}else
+{
+print OUTFILE "$array";
+}
+
+print OUTFILE " ";
+if((($array3 eq"Version")||($array3 eq"1")||($array3 eq"2")||($array3 eq"3")||($array3 eq"4")||($array3 eq"5")||($array3 eq"6")||($array3 eq"7")||($array3 eq"8")||($array3 eq"9")||($array3 eq"10")
+                         ||($array3 eq"11")||($array3 eq"12")||($array3 eq"13")||($array3 eq"14")||($array3 eq"15")||($array3 eq"16")||($array3 eq"17")||($array3 eq"18")||($array3 eq"19")||($array3 eq"20")
+                         ||($array3 eq"21")||($array3 eq"22")||($array3 eq"23")||($array3 eq"24")||($array3 eq"25")||($array3 eq"26")||($array3 eq"27")||($array3 eq"28")||($array3 eq"29")||($array3 eq"30")
+                         ||($array3 eq"31")||($array3 eq"32")||($array3 eq"33")||($array3 eq"34")||($array3 eq"35")||($array3 eq"36")||($array3 eq"37")||($array3 eq"38")||($array3 eq"39")||($array3 eq"40")
+                         ||($array3 eq"41")||($array3 eq"42")||($array3 eq"43")||($array3 eq"44")||($array3 eq"45")||($array3 eq"46")||($array3 eq"47")||($array3 eq"48")||($array3 eq"49")||($array3 eq"50")))
+ {
+$b=length($array1);
+if($b==$a2)
+{
+
+print OUTFILE $array1," ";
+}elsif($b<$a2)
+{
+print OUTFILE "$array1";
+$d=$a2-$b;
+
+for($i=0;$i<=$d;$i++)
+{
+print OUTFILE " ";
+}
+}else
+{
+print OUTFILE "$array1 ";
+}
+}else
+{
+if($array eq "Version")
+{
+print OUTFILE "$array1.0";
+}else
+{
+print OUTFILE "$array1";
+}
+}
+$g=length($array2);
+if($g>2)
+{
+
+
+if($g==$g2)
+{
+print"equal $array2\n";
+print OUTFILE "$array2 ";
+}elsif($g<$g2)
+{
+$gd=$g2-$g;
+if(($array2 eq "Version")||($array2 eq "version"))
+{
+print OUTFILE "   $array2";
+}
+else{
+print OUTFILE "$array2";
+for($i=0;$i<=$gd;$i++)
+{
+print OUTFILE " ";
+}
+}
+}
+}else
+{ 
+print OUTFILE "  $array2";
+}
+if((($array3 =~/ /)||($array4 =~/ /)||($array5 =~/ /)))
+{
+
+
+
+
+print OUTFILE "   $array3";
+
+print OUTFILE "   ";
+
+print OUTFILE "     $array4     ";
+
+
+
+print OUTFILE "$array5\n";
+
+
+
+print OUTFILE "$array6";
+}
+else
+{
+
+print OUTFILE "   $array3  ";
+print OUTFILE "   $array4";
+print OUTFILE "$array5\n";
+print OUTFILE "$array6";
+}
+
+}
+close(VERSION2);
+close(OUTFILE);
+
+open(VERSION,">Version.tcf");
+
+open(INFILE,"<123.tcf");
+$i=0;
+while(<INFILE>)
+{
+	chomp;
+	
+	$inputstring = $_;
+	
+	if(($i==1)||($i==2)||($i==2)||($i==5)||($i==6))
+	{ 
+	if($i==1)
+	{
+	$CF=($inputstring =~/CFPHF/);
+	}
+	$i++;
+	}elsif( length() < 79 )
+	{
+		print VERSION "$_ \n";
+		$i++;
+	}
+	else
+	{
+	$i++;
+	 while(length($inputstring)> 0 )
+	 
+	 {
+	 
+	 
+	
+		$str1 = substr($inputstring,0,79);
+		
+        	$lastw = (rindex($str1,' ')||rindex($str1,':')||rindex($str1,',')||rindex($str1,'-'));
+		
+		
+		print VERSION substr($inputstring,0,$lastw);
+		
+		print VERSION "\n";
+		
+		$inputstring= substr($inputstring,$lastw);
+		
+				
+		if (length($inputstring)<79)
+		{
+				
+		print VERSION "                                              ";
+		print VERSION "$inputstring\n";
+		print VERSION "                                              ";
+		
+		$inputstring = "";
+		
+		}
+		
+			
+		
+          }
+		
+#print VERSION "\n";
+
+	}
+	
+}
+
+close(INFILE);
+close(VERSION);
+
+open(VERSION2,"<Version2.tcf");                                                 #Programming for Naming convention starts here:
+$MName=<VERSION2>;
+$MName=~ s/\n//g;
+$FName=<VERSION2>;
+$FName=~ s/\n//g;
+
+if($CF)
+{
+
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Dynamic_Coverage_Analysis_Report.html\n");
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Harness_INST.c\n");
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Harness_UNINST.c\n"); 
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _inszt.c\n");
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Testplan.xls\n");
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Testreport_INST.html\n"); 
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Testreport_UNINST.html\n");
+print VERSION3 ("SSIT_B787_CFPHF-9_ $MName _ $FName _Testscript.tcf\n");
+}else
+{
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Dynamic_Coverage_Analysis_Report.html\n");
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Harness_INST.c\n");
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Harness_UNINST.c\n"); 
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _inszt.c\n");
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Testplan.xls\n");
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Testreport_INST.html\n"); 
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Testreport_UNINST.html\n");
+print VERSION3 ("SSIT_B787_PFPHF-9_ $MName _ $FName _Testscript.tcf\n");
+}
+close(VERSION2);
+close(VERSION3);
+
+
+
+
+
+open(VERSION3,"<Version3.tcf");
+
+ if($infile =~ /(.*)\.xls/)
+     
+     {
+       
+             
+        $tcf_naming = $1;
+               
+        $tcf_naming=~ s/Testplan$/NamingConventions/g;
+              
+        open (VERSION4, ">$tcf_naming.tcf");
+        
+        
+$FNam=<VERSION3>;
+$FNam=~ s/ //g;
+while($FNam ne "")
+{
+
+@VERSION3=split(//,$FNam);
+$w2=@VERSION3;
+
+for($i=0;$i<$w2;$i++)
+{
+print VERSION4 ("$VERSION3[$i]");
+}
+print VERSION4 ("\n");
+$FNam=<VERSION3>;
+$FNam=~ s/ //g;
+}                                                                                 #Programming for Naming convention ends  here:
+
+close(VERSION3);
+close(VERSION4);
+}
+       
+     print TCF"    # Begin Text\n";
+     print TCF"----------------------------------------------------------------------------------------------\n";
+     print TCF"VERSION INFO\n";
+     print TCF"-----------------------------------------------------------------------------------------------\n";
+     print TCF"Rev         Author                Created/Modified Date      Remarks                          |\n";
+	 print TCF"-----------------------------------------------------------------------------------------------\n";
+	 print TCF"1.0         XXXXXXX               DD-Mon-YYYY           Initial Version for                   |\n";
+     print TCF"                                                       OHDC BBP SDD baseline 4.4              |\n";
+	 print TCF"-----------------------------------------------------------------------------------------------\n";
+unless(open(VERSION1,"<Version.tcf"))
+{
+print"Unable to open Version.tcf for reading ";
+}
+
+
+$ver=<VERSION1>;
+while($ver ne "")
+{
+#$result=($ver=~/^ Author/);
+#if($result==1)
+#{
+#while(!(($ver=~/^Modules/)||($ver=~/^Modules:/)||($ver=~/^Modules :/)))
+#{
+#$ver=~ s/ +$//g;
+#print TCF ($ver);
+#$ver=<VERSION1>;
+#}
+#}
+$ver=~ s/^ +//g;
+$ver=~ s/ +$//g;
+
+print TCF ($ver);
+
+$ver=<VERSION1>;
+}
+
+     print TCF"\n-------------------------------------------------------------------------------\n";
+#     print TCF"    # End Text\n";
+     
+close(VERSION1);
+#--------------------------------------------Sheet2---------------------------------------------     
+
+my $sheet = $Book->Worksheets(2);
+
+
+
+
+
+$ex=$la2=$lb2=$lc2=$ld2=$le2=$lf2=$lg2=$lh2=$lj2=$li2=$Sin=$re=0;
+
+
+
+my $z;
+my $S;
+
+    print "\n****************RangeTable*******************\n";
+
+for($z=1;$z<5000;$z++)                #For calculating the length of array elements
+
+{
+
+
+    print "$z Executing Testplan... Please Wait.. \n";
+     $output_text->update();
+
+     $info = "$z Executing Please Wait...";
+     
+       $status->update();
+     
+my $array1 = $sheet->Range("A$z")->{Value};
+
+my $array2 = $sheet->Range("B$z")->{Value};
+
+my $array3 = $sheet->Range("C$z")->{Value};
+
+my $array4 = $sheet->Range("D$z")->{Value};
+
+my $array5 = $sheet->Range("E$z")->{Value};
+
+my $array6 = $sheet->Range("F$z")->{Value};
+
+my $array7 = $sheet->Range("G$z")->{Value};
+my $array8 = $sheet->Range("H$z")->{Value};
+my $array9 = $sheet->Range("I$z")->{Value};
+my $array10 = $sheet->Range("J$z")->{Value};
+
+
+               unless ((($sheet->Range("A$z")->{Value})||
+                        ($sheet->Range("B$z")->{Value})||
+                        ($sheet->Range("C$z")->{Value})||
+                        ($sheet->Range("D$z")->{Value})||
+                        ($sheet->Range("E$z")->{Value})||
+                        ($sheet->Range("F$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})))
+                        
+		        {
+		        $S++;
+		        
+		        if($S>10)
+		        {
+		        $z=5001;
+		        }
+		        next;
+		        }
+
+$S=0;		        
+	$re=(($array1 =~/^Singularity Table/i)||($array1 =~/^SingularityTable/i)||($array1 =~/^Singularitytable/i)||($array1 =~/^Singularity table/i));
+	$re1=(($array1 =~/^Where::/i)||($array1 =~/^Where:/i)||($array1 =~/^Where,/i)||($array1 =~/^Where/i)||($array1 =~/^Where./i)||($array1 =~/^Where../i));
+
+
+ if(!($re))  
+      {
+
+      if(!($ex==10))
+      {      
+          $la1=length($array1); if($la1>$la2){$la2=$la1;};
+          $lb1=length($array2); if($lb1>$lb2){$lb2=$lb1;};
+          $lc1=length($array3);	if($lc1>$lc2){$lc2=$lc1;};
+          $ld1=length($array4); if($ld1>$ld2){$ld2=$ld1;};
+          $le1=length($array5); if($le1>$le2){$le2=$le1;};
+	  $lf1=length($array6);	if($lf1>$lf2){$lf2=$lf1;};
+          $lg1=length($array7); if($lg1>$lg2){$lg2=$lg1;};
+          $lh1=length($array8); if($lh1>$lh2){$lh2=$lh1;};
+          $li1=length($array9); if($li1>$li2){$li2=$li1;};
+         $lj1=length($array10); if($lj1>$lj2){$lj2=$lj1;};
+   
+
+      }elsif(!($re1))
+       {
+       if(!($Sin==20))
+        {
+         $Sa1=length($array1); if($Sa1>$Sa2){$Sa2=$Sa1;}
+
+         $Sb1=length($array2); if($Sb1>$Sb2){$Sb2=$Sb1;}
+
+	 $Sc1=length($array3); if($Sc1>$Sc2){$Sc2=$Sc1;}
+
+	 $Sd1=length($array4); if($Sd1>$Sd2){$Sd2=$Sd1;}
+
+	 $Se1=length($array5); if($Se1>$Se2){$Se2=$Se1;}
+
+	 $Sf1=length($array6); if($Sf1>$Sf2){$Sf2=$Sf1;}
+
+         $Sg1=length($array7); if($Sg1>$Sg2){$Sg2=$Sg1;}
+
+        }
+}else
+{
+ $Sin=20;
+
+}
+       
+          }elsif($re)
+          {
+     
+          $ex=10;
+          
+          print "$ex\n";
+          }		        
+}
+#Space for sub routines:
+
+      $cosmetic_line_cnt=$cosmetic_line_cnt1=0;
+
+$ex=$Sin=$re=$a=0;
+for($z=1;$z<5000;$z++)
+
+{
+
+    print "$z Executing Testplan... Please Wait.. \n";
+     $output_text->update();
+
+     $info = "$z Executing Please Wait...";
+     
+       $status->update();
+     
+my $array1 = $sheet->Range("A$z")->{Value};
+
+my $array2 = $sheet->Range("B$z")->{Value};
+
+my $array3 = $sheet->Range("C$z")->{Value};
+
+my $array4 = $sheet->Range("D$z")->{Value};
+
+my $array5 = $sheet->Range("E$z")->{Value};
+
+my $array6 = $sheet->Range("F$z")->{Value};
+
+my $array7 = $sheet->Range("G$z")->{Value};
+my $array8 = $sheet->Range("H$z")->{Value};
+my $array9 = $sheet->Range("I$z")->{Value};
+my $array10 = $sheet->Range("J$z")->{Value};
+
+               unless ((($sheet->Range("A$z")->{Value})||
+                        ($sheet->Range("B$z")->{Value})||
+                        ($sheet->Range("C$z")->{Value})||
+                        ($sheet->Range("D$z")->{Value})||
+                        ($sheet->Range("E$z")->{Value})||
+                        ($sheet->Range("F$z")->{Value})||
+                        ($sheet->Range("G$z")->{Value})||
+                        ($sheet->Range("H$z")->{Value})||
+                        ($sheet->Range("I$z")->{Value})||
+                        ($sheet->Range("J$z")->{Value})))
+                                                
+		        {
+		        $a++;
+		        
+		        if($a>10)
+		        {
+		        $z=5001;
+		        }
+		        next;
+		        }
+$a=0;	
+	$re=(($array1 =~/^Singularity Table/)||($array1 =~/^SingularityTable/)||($array1 =~/^Singularitytable/)||($array1 =~/^Singularity table/));
+        $re1=(($array1 =~/^Where::/)||($array1 =~/^Where:/)||($array1 =~/^Where,/)||($array1 =~/^Where/)||($array1 =~/^Where./)||($array1 =~/^Where../));
+
+
+ if(!($re))  
+ {
+ if(!($ex==10))
+{ 
+if(($cosmetic_line_cnt==0))
+{
+
+print TCF "INPUT RANGE TABLE :\n";
+
+
+$cosmetic_line_cnt++;
+next;
+#print TCF "soup1$cosmetic_line_cnt";
+}else
+{
+$cosmetic_line_cnt++;
+&FO();
+
+
+
+}
+print TCF "\n";
+$a=0;
+$la=length($array1);if($la==$la2){print TCF "|$array1";}elsif($la<$la2){print TCF "|$array1";$Dla=$la2-$la;for($i=0;$i<$Dla;$i++){print TCF " ";}}
+
+$lb=length($array2);if($lb==$lb2){print TCF "|$array2";}elsif($lb<$lb2){print TCF "|$array2";$Dlb=$lb2-$lb;for($i=0;$i<$Dlb;$i++){print TCF " ";}}
+
+$lc=length($array3);if($lc==$lc2){print TCF "|$array3";}elsif($lc<$lc2){print TCF "|$array3";$Dlc=($lc2-$lc);for($i=0;$i<$Dlc;$i++){print TCF " ";}}
+
+$ld=length($array4);if($ld==$ld2){print TCF "|$array4";}elsif($ld<$ld2){print TCF "|$array4";$Dld=$ld2-$ld;for($i=0;$i<$Dld;$i++){print TCF " ";}}
+
+$le=length($array5);if($le==$le2){print TCF "|$array5";}elsif($le<$le2){print TCF "|$array5";$Dle=$le2-$le;for($i=0;$i<$Dle;$i++){print TCF " ";}}
+
+$lf=length($array6);if($lf==$lf2){print TCF "|$array6";}elsif($lf<$lf2){print TCF "|$array6";$Dlf=$lf2-$lf;for($i=0;$i<$Dlf;$i++){print TCF " ";}}
+
+$lg=length($array7);if($lg==$lg2){print TCF "|$array7";}elsif($lg<$lg2){print TCF "|$array7";$Dlg=$lg2-$lg;for($i=0;$i<$Dlg;$i++){print TCF " ";}}
+
+$lh=length($array8);if($lh==$lh2){print TCF "|$array8";}elsif($lh<$lh2){print TCF "|$array8";$Dlh=$lh2-$lh;for($i=0;$i<$Dlh;$i++){print TCF " ";}}
+
+$li=length($array9);if($li==$li2){print TCF "|$array9";}elsif($li<$li2){print TCF "|$array9";$Dli=$li2-$li;for($i=0;$i<$Dli;$i++){print TCF " ";}}
+
+$lj=length($array10);
+if($lj==$lj2)
+{
+print TCF "|$array10|";
+}elsif($lj<$lj2)
+{
+print TCF "|$array10";
+$Dlj=$lj2-$lj;
+for($i=0;$i<$Dlj;$i++)
+{
+print TCF " ";
+}
+print TCF "|";
+}
+
+
+}elsif(!($re1))
+{
+
+if(!($Sin==20))
+{
+
+  if($cosmetic_line_cnt1==0)
+  {
+  #print TCF "$array1\n";
+  $cosmetic_line_cnt1++;
+    # print TCF "hi $cosmetic_line_cnt1" ;
+  #   next;
+  }else
+  {
+ # print TCF "\n";
+   &FO1();
+   $cosmetic_line_cnt1++;
+  #print TCF "hello$cosmetic_line_cnt1" ;
+   }
+#print TCF "\n";
+
+$a=0;
+$Sa=length($array1);if($Sa==0){print TCF "";}elsif($Sa==$Sa2){print TCF "|$array1";}elsif($Sa<$Sa2){print TCF "|$array1";$DSa=$Sa2-$Sa;for($i=0;$i<$DSa;$i++){print TCF " ";}}
+
+$Sb=length($array2);if($Sb==0){print TCF "    ";}elsif($Sb==$Sb2){print TCF "|$array2";}elsif($Sb<$Sb2){print TCF " |$array2";$DSb=$Sb2-$Sb;for($i=0;$i<$DSb;$i++){print TCF " ";}}
+
+$Sc=length($array3);if($Sc==0){print TCF "";}elsif($Sc==$Sc2){print TCF "|$array3";}elsif($Sc<$Sc2){print TCF "|$array3";$DSc=$Sc2-$Sc;for($i=0;$i<$DSc;$i++){print TCF " ";}}
+
+$Sd=length($array4);if($Sd==0){print TCF "";}elsif($Sd==$Sd2){print TCF "|$array4";}elsif($Sd<$Sd2){print TCF "|$array4";$DSd=$Sd2-$Sd;for($i=0;$i<$DSd;$i++){print TCF " ";}}
+
+$Se=length($array5);if($Se==0){print TCF "";}elsif($Se==$Se2){print TCF "|$array5";}elsif($Se<$Se2){print TCF "|$array5";$DSe=$le2-$le;for($i=0;$i<$DSe;$i++){print TCF " ";}}
+
+$Sf=length($array6);if($Sf==0){print TCF "";}elsif($Sf==$Sf2){print TCF "|$array6";}elsif($Sf<$Sf2){print TCF "|$array6";$DSf=$Sf2-$Sf;for($i=0;$i<$DSf;$i++){print TCF " ";}}
+
+$Sg=length($array7);if($Sg==0){print TCF "|";}elsif($Sg==$Sg2){print TCF "|$array7";}elsif($Sg<$Sg2){print TCF "|$array7";$DSg=$Sg2-$Sg;for($i=0;$i<$DSg;$i++){print TCF " ";}}
+}                                                                   #End of if statement if($Sin=20) 
+
+
+
+else
+{
+
+if(!($array1 eq ""))
+{
+$string = join(" ","$array1","$array2","$array3","$array4","$array5","$array6");
+
+	$inputstring = ($string);
+	
+	if( length($inputstring) < 78)
+	{
+	
+		print TCF "$inputstring\n\n";
+		$i++;
+	}
+	else
+	{
+
+	 while(length($inputstring)> 0 )
+	 
+	 { 
+	
+		$str1 = substr($inputstring,0,78);
+		
+        	$lastw = (rindex($str1,' ')||rindex($str1,':')||rindex($str1,',')||rindex($str1,'-'));
+		
+		
+		print TCF substr($inputstring,0,$lastw);
+		
+		print TCF "\n";
+		
+		$inputstring= substr($inputstring,$lastw);
+		
+				
+		if (length($inputstring)<78)
+		{
+				
+		
+		print TCF "$inputstring";
+		
+		$inputstring = "";
+		
+		}
+		
+			
+		
+          }
+		
+print TCF "\n\n";
+
+	}
+	
+}#end of array1 reading and srtart of array2 reading
+
+
+
+
+}#End of else...
+}
+else
+{
+&FO1();
+
+$Sin=20;
+print TCF "\n\n$array1\n\n";
+
+
+ 
+
+}
+
+}#End of if statement
+elsif(($re))
+          {
+          &FO();
+             print TCF "\n\n\n";
+         # &FO1();
+         print TCF "\nSINGULARITY TABLE :";
+          #print TCF "\n$array1\n";
+          &FO1();
+          $ex=10;
+          }
+}#End of for loop
+
+
+sub FO()
+{
+print TCF "\n";
+for($u=0;$u<($TOT=($la2+$lb2+$lc2+$ld2+$le2+$lf2+$lg2+$lh2+$lj2+$li2+10));$u++)
+{
+print TCF "-";
+}
+
+}
+sub FO1()
+{
+print TCF "\n";
+for($u=0;$u<($SOT=($Sa2+$Sb2+$Sc2+$Sd2+$Se2+$Sf2+$Sg2+8));$u++)
+{
+print TCF "-";
+}
+print TCF "\n";
+}
+
+#----------------------------------------------Sheet3----------------------------------------
+     
+    $sheet = $Book->Worksheets(3);
+     
+     
+     
+     
+     open(OUTFILE,">tcf.tcf");
+     
+
+      my $a;
+
+    print "\n****************TCF*******************\n";
+
+     for($c=1;$c<100000;$c++)
+     
+     {
+
+     
+    print "$c Executing Testplan... Please Wait.. \n";
+     $output_text->update();
+     
+     $info = "$c Executing Please Wait...";
+     
+       $status->update();
+     
+     my $array = $sheet->Range("A$c")->{Value};
+     
+     my $array1 = $sheet->Range("B$c")->{Value};
+     
+     my $array2 = $sheet->Range("C$c")->{Value};
+     
+     my $array3 = $sheet->Range("D$c")->{Value};
+     
+     my $array4 = $sheet->Range("E$c")->{Value};
+     
+     my $array5 = $sheet->Range("F$c")->{Value};
+     
+     my $array6 = $sheet->Range("G$c")->{Value};
+     
+     my $array7 = $sheet->Range("H$c")->{Value};
+     
+     my $array8 = $sheet->Range("I$c")->{Value};
+
+     my $array9 = $sheet->Range("J$c")->{Value};
+
+     my $array10 = $sheet->Range("K$c")->{Value};
+
+     my $array11 = $sheet->Range("L$c")->{Value};
+     
+              unless ((($sheet->Range("A$c")->{Value})||
+                             ($sheet->Range("B$c")->{Value})||
+                             ($sheet->Range("C$c")->{Value})||
+                             ($sheet->Range("D$c")->{Value})||
+                             ($sheet->Range("E$c")->{Value})||
+                             ($sheet->Range("F$c")->{Value})||
+                             ($sheet->Range("G$c")->{Value})||
+                             ($sheet->Range("H$c")->{Value})||
+			     ($sheet->Range("I$c")->{Value})||
+			     ($sheet->Range("J$c")->{Value})||
+			     ($sheet->Range("K$c")->{Value})||
+                             ($sheet->Range("L$c")->{Value})))
+                             
+     		        {
+     		        $a++;
+     		        
+     		        if($a>10)
+     		        {
+     		        $c=100001;
+     		        }
+     		        next;
+     		        }
+                         
+           
+
+     print OUTFILE "\n";
+      
+     
+     $a=0;
+     
+     print OUTFILE"$array";
+     
+     print OUTFILE " ";
+
+     
+     print OUTFILE "$array1";
+     print OUTFILE " ";
+     print OUTFILE "$array2";
+     print OUTFILE " ";
+     print OUTFILE "$array3";
+     print OUTFILE " ";
+     print OUTFILE "$array4";
+     print OUTFILE " ";
+     print OUTFILE "$array5";
+     print OUTFILE " ";
+     print OUTFILE "$array6";
+     print OUTFILE " ";
+     print OUTFILE "$array7";
+     print OUTFILE " ";
+     print OUTFILE "$array8";
+     print OUTFILE " ";
+     print OUTFILE "$array9";
+     print OUTFILE " ";
+     print OUTFILE "$array10";
+     print OUTFILE " ";
+     print OUTFILE "$array11";     
+     
+}
+     
+     close(OUTFILE);    
+     
+  $Book->Close;   
+  
+         #-----------------------------------------------------------------------------
+        
+        print TCF "\n\n";
+        print TCF "-------------------------------------------------------------------------------\n\n";  
+         
+        print TCF "LDRA Syntax:- \n\n";
+        
+        print TCF " All Keywords used in LDRA are case sensitive.\n\n";
+        
+        print TCF  "Meaning of the following Keywords used in TCF file\n\n";
+        
+        print TCF"%            : Return of the function( If return of the function under\n";
+        print TCF"               test is other than void).\n\n";
+                         
+        print TCF"Usage = Z    : LDRA recognizes the associated variable as a function\n";
+        print TCF"               parameter applied through local.\n\n";
+        
+        print TCF"Usage = G    : LDRA recognizes the associated variable as a global input\n";
+        print TCF"               variable.\n \n";
+        
+        print TCF"Usage = H    : LDRA recognizes the associated variable as a global output\n";
+        print TCF"               variable.\n\n";
+        
+        print TCF"Usage = O    : LDRA recognizes the associated variable as a Function return or\n";
+        print TCF"               Output parameter.\n\n";
+        
+        print TCF"Usage = P    : LDRA recognizes the associated variable as a Parameter\n";
+        print TCF"               pointer initialization.\n\n";
+        
+        print TCF"Usage = Q    : LDRA recognizes the associated variable as a global\n"; 
+	print TCF"               pointer initialization.\n\n";
+
+        
+        print TCF "-------------------------------------------------------------------------------\n \n";  
+  
+  print TCF"    # End Text\n";
+
+      open(INFIL,"<tcf.tcf");
+      
+      open(INFIL1,">Tcf_Input.tcf");
+        
+        @input =<INFIL>;
+       
+        $count = 0;
+       
+        while ($input[$count] ne "") 
+        
+        {
+       
+               $input[$count] =~ s/^[ \t]+//;
+       
+               $input[$count] =~ s/[ \t]+\n$/\n/;
+       
+               $input[$count] =~ s/[ \t]+/ /g;
+       
+                $count++;
+                
+      
+         }
+       
+       
+     print INFIL1 ("@input");
+     
+     close(INFIL);
+     close(INFIL1); 
+     
+     
+
+    
+      unless(open(TCF_INPUT,"<Tcf_Input.tcf"))
+      {
+      print "Tcf_Input.tcf file is not there";
+      }
+      $k=1;
+      $f=1;
+      $PP=0;
+      $words =<TCF_INPUT>;
+      while($words ne"")
+      {
+      if(($words =~/Test Type/i)||($words =~/TestType:/i))
+      {
+      
+      if($f==1)
+      {
+       print TCF ("    # Begin Attributes\n\n");
+       print TCF ("      Sequence Name = $FName\n");
+       print TCF ("      Language Code = 2\n\n");
+       print TCF ("    # End Attributes\n\n");
+      $f=0;
+      }
+      &Obj();
+      }
+      if(($words =~/^ Initialization/)||($words =~/^ Initialization :/)||($words =~/^ Initialization:/))
+      {
+      &init();
+      }
+      if(($words =~ /^ Expected Output/)||($words =~ /^ Expected output:/)||($words =~ /^ Expected output  :/)||($words =~ /^ Expected output :/)||($words =~ /^ Expected Outputs/)||($words =~ /^ Expected outputs:/)||($words =~ /^ Expected outputs  :/)||($words =~ /^ Expected/))
+     {
+      &Expect();
+      }
+      if($words =~ /^\s*Stubs\s*[:]*\s*$/i)
+     {
+      &Stubs();
+      }
+      $words =<TCF_INPUT>;
+      }
+      
+      
+      
+      sub Obj()
+      {
+      
+      
+      print TCF ("    # Begin Test Case\n\n");
+      if($CF)
+      {
+      print TCF ("      File = ..\\..\\E:\\OHDC\\SOURCE\\$MName\\$MName.c\n");
+      }else
+      {
+      print TCF ("      File = ..\\..\\E:\\OHDC\\SOURCE\\$MName\\$MName.c\n");
+      }
+      print TCF ("      Procedure = $FName\n");
+      print TCF ("      Procedure Number = 1\n");
+      print TCF ("      Creation Date =");
+     my $timestr = localtime(time);
+     @q=split(//,$timestr);
+     $w=@q;
+     for($i=3;$i<$w-4;$i++)
+     {
+     if($i==11)
+     {
+     print TCF "2014 ";
+     }
+     print TCF "$q[$i]";
+     }
+      
+      print TCF ("\n      Description = TEST M");
+
+      $PP=$k++;
+      print TCF ($PP,"\n\n");      
+
+      {
+      print TCF ("      # Begin Text\n\n");
+      
+      while(!(($words =~/^ Initialization:/)||($words =~/^ Initialization :/)||($words =~/^ Initialization/)))
+      {
+      @a= split(/\s/,$words);
+      $w=@a;
+      $b1=0;
+      for($j=1;$j<$w;$j++)
+      {
+      $b2=length($a[$j]);
+      $b1=$b2+$b1+1;
+    $j1=$j;
+    $Us=$a[$j++];
+    $Va=$a[$j++];
+    $Na=$a[$j++];
+    $De=$a[$j++];
+    $j2=$j;
+    $j=$j1;
+    $v1=0;
+     if(($Us eq "I/O"))
+               {
+               $v1=1;
+               $j=$j2; 
+               }
+    }   
+       	if( length($words) < 78 )
+       	{
+       	   if(( $v1==1))
+               {
+               
+               }else
+               {
+               
+       	    print TCF "$words";
+       	   }
+       	}
+       	else
+       	{
+       	
+       	 while(length($words)> 0 )
+       	    	 { 	
+       		$str1 = substr($words,0,78);
+       		
+               	$lastw = (rindex($str1,' ')||rindex($str1,':')||rindex($str1,',')||rindex($str1,'-'));
+       		
+       		
+       		print TCF substr($words,0,$lastw);
+       		
+       		print TCF "\n  ";
+       		
+       		$words= substr($words,$lastw);
+       		
+       				
+       		if (length($words)<79)
+       		{   		
+       		print TCF "$words";
+       		 $words = "";
+       		
+       		}
+                 } #end of while (length($words)> 0 )
+       		
+      
+       	} #end of else
+       
+    
+     print TCF ("\n");
+         $words =<TCF_INPUT>;
+         }
+         }
+    print TCF ("      # End Text\n");
+    }
+    
+      sub init()
+      {
+      $init1=1;
+      $i=0;
+      #print TCF ("\nInitialization:\n\n");
+      while(!(($words =~ /^ Expected Output/)||($words =~ /^ Expected output:/)||($words =~ /^ Expected output  :/)||($words =~ /^ Expected output :/)||($words =~ /^ Expected Outputs/)||($words =~ /^ Expected outputs:/)||($words =~ /^ Expected outputs  :/)||($words =~ /^ Expected/)))
+      {
+      @b4= split(/\s/, $words);
+      $w=@b4;
+      
+      if(!($w<=4))
+      {
+      for($j=$w-1;$j>($w-3);)
+      {
+      $De=$b4[$j--];
+      $Na=$b4[$j--];
+      $Va=$b4[$j--];
+      $Us=$b4[$j--];
+      
+      $character=(($Va=~/'/));if($character) {$Va=join("","'",$Va);}
+      
+      $result = ((($De =~/ /)||($De =~/Variables:/)||($De =~/Variable:/)||($De =~/Variable :/)||($De =~/variables:/)||($De =~/variable :/)||($De =~/variables :/)));
+      
+      if(($Us eq"I")||($Us eq"O")||($Us eq"i")||($Us eq"o")||($Us eq"G"))
+      {
+      $Us="G";
+      }
+      elsif(($Us eq "Z")||($Us eq "z"))
+      {
+      $Us="Z";
+      }elsif(($Us eq "P")||($Us eq "p"))
+      {
+      $Us="P";
+      }elsif(($Us eq "Q")||($Us eq "q"))
+      {
+      $Us="Q";
+      }
+          
+    if(($w>6)||($De =~/Variables:/)||($De =~/variables:/)||($De =~/Variables :/)||($De =~/variables :/)||($De =~/Variable:/)||($De =~/variable:/)||($De =~/Variable :/)||($De =~/variable :/))
+      {
+   
+      if(($Us eq "G")||($Us eq "P")||($Us eq "Z")||($Us eq "Q"))
+      {
+      print TCF ("Initialization of output variables:\n\n");
+      }else
+      {
+      print TCF ("$words\n\n");
+       $init1=0;
+      }
+      }
+      
+      if(($result==1)||($Us eq "I/O"))
+      {      
+     
+      }
+      elsif((!($w>6))||(($Us eq "G")||($Us eq "P")||($Us eq "Z")||($Us eq "Q")))
+      { 
+      if($init1==1){print TCF ("\nInitialization:\n\n");$init1=0;}
+      
+      print TCF ("        # Begin Variable\n\n");
+      print TCF ("          Name = $Na\n");
+      print TCF ("          Decl_type = $De\n");
+      print TCF ("          Usage = $Us\n");
+      print TCF ("          Value = $Va\n\n");
+      print TCF ("        # End Variable\n\n");
+      $i++;
+      
+      }
+      }
+      }
+   
+      
+    if((($w==4)||($w==3))&&($w!=0))
+    { 
+     $init1=0;
+      print TCF ("$words\n\n");
+
+    
+
+       MsgBox("Automated TCFTool", "In Testcase $PP at Initialization following line,\n\n$words\nYou have missed either I/O or Name or Type.", 48);
+      
+          
+          print "\n******* Mistakes in your Testplan at Initialization ********\n ";
+          print "\n In Testcase $PP following line,\n\n$words\nYou have missed either I/O or Name or Type.\n";
+          $output_text->update();
+      
+
+    }
+       $words =<TCF_INPUT>;
+      }
+      }
+      
+      
+sub Expect()
+{
+	$i=0;
+	print TCF ("Expected Outputs:\n\n");
+
+	while(!(($words =~ /Stubs/i) || ($words =~ /Test\s*case/i)))
+	{
+		@b3= split(/\s/, $words);
+		$w=@b3;
+      		if($words eq "")
+      		{
+      		last;
+      		}
+		if(!($w<=4))
+		{
+
+			for($j=$w-1;$j>($w-3);)
+			{
+
+				$De=$b3[$j--];
+				$Na=$b3[$j--];
+				$Va=$b3[$j--];
+				$Us=$b3[$j--];
+
+				$character=(($Va=~/'/));
+
+
+				if($character)
+				{
+					print "\n$character $Va\n";
+					$Va=join("","'",$Va);       
+
+				}
+
+				$result = (($De =~/ /)||($Na =~/Expected/));
+
+				if(($Us eq "O")||($Us eq "o")||($Us eq "I")||($Us eq "i"))
+				{
+					$Us="H";
+				}
+
+				if(($Us eq "H")&&($Na eq "%"))
+				{
+					$Us="O";
+				}
+
+
+
+
+				if(($result==1)||($Us eq "I/O"))
+				{
+					
+				}
+				else
+				{
+
+					print TCF ("        # Begin Variable\n\n");
+					print TCF ("          Name = $Na\n");
+					print TCF ("          Decl_type = $De\n");
+					print TCF ("          Usage = $Us\n");
+					print TCF ("          Value = $Va\n\n");
+					print TCF ("        # End Variable\n\n");
+					$i++;
+				}
+			}        
+		}
+
+		if((($w==4)||($w==2))&&($w!=0))
+		{ 
+
+
+			print TCF ("In testplan After the above variable You have missed either I/O or Name or Type.\n\n");
+
+
+			MsgBox("Automated TCFTool", "In Testcase $PP at Expected Outputs following line,\n\n$words\nYou have missed either I/O or Name or Type.", 48);
+
+
+			print "\n****** Mistakes in your Testplan at Expected Outputs******\n ";
+			print "\n In Testcase $PP following line,\n\n$words\nYou have missed either I/O or Name or Type.\n";
+			$output_text->update();
+
+
+		}
+
+		$words =<TCF_INPUT>;
+	}
+	if($words =~ /Test\s*case/i){ print TCF "    # End Test Case\n\n"; }
+}
+
+sub Stubs()
+{
+    my $stubName=""; $Overloading="";
+	$i=0;
+	print TCF ("Stubs:\n\n");
+
+	while(!($words =~ /Test\s*case/i))
+	{
+		
+		if($words =~ /STUB\s*(\S+)\s*\((.*)\)/)
+		{
+			$stubName = $1;
+			@b3=""; @b3= split(/,/, $2);
+			$Overloading="@b3";
+			print TCF "      # Begin TC Stub\n";
+			print TCF "\n";
+			print TCF "        Procedure = $stubName\n";
+			print TCF "  Overloading = Prototype\n";
+			print TCF "\n";
+			print TCF "  # Begin Overloading\n";
+	  foreach(@b3){ print TCF "$_\n"; }
+			print TCF "  # End Overloading\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /^.*(\d+)[ \t]+Hit count/i){
+			print TCF "      # Begin TC Stub TC Hit Count\n";
+			print TCF "\n";
+			print TCF "        Setting = 3\n";
+			print TCF "        Specified = $1\n";
+			print TCF "      # End TC Stub TC Hit Count\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /^\s*[IG][ \t]+([^\t]+)[ \t]+([^\t]+)[ \t]+([^\t]+)[ \t]*$/){
+			print TCF "        # Begin TC Stub Input Params\n";
+			print TCF "\n";
+			print TCF "          Name = $2\n";
+			print TCF "          Type = $3";
+			print TCF "          Value = $1\n";
+			print TCF "\n";
+			print TCF "        # End TC Stub Input Params\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /^\s*[HO][ \t]+([^\t]+)[ \t]+%[ \t]+([^\t]+)[ \t]*$/){
+			print TCF "        # Begin TC Stub Return Value\n";
+			print TCF "\n";
+			print TCF "          Name = %\n";
+			print TCF "          Type = $2";
+			print TCF "          Value = $1\n";
+			print TCF "\n";
+			print TCF "        # End TC Stub Return Value\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /^\s*[HO][ \t]+([^\t]+)[ \t]+([^\t]+)[ \t]+([^\t]+)[ \t]*$/){
+			print TCF "        # Begin TC Stub Output Params\n";
+			print TCF "\n";
+			print TCF "          Name = $2\n";
+			print TCF "          Type = $3";
+			print TCF "          Value = $1\n";
+			print TCF "\n";
+			print TCF "        # End TC Stub Output Params\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /CodeSegment/i){
+			
+			@b3= split(/\s/, $words);
+			@names= split(/,/, $b3[3]);
+			@values= split(/,/, $b3[2]);
+			
+			print TCF "        # Begin TC Stub Code Segment\n";
+			print TCF "\n";	
+			
+			for($i=0;$i<=$#names;$i++)
+			{	
+				for($j=0;$j<=$#values;$j++)
+				{
+					if($i==$j)
+					{
+			 		print TCF "$names[$i]=$values[$j];\n";	
+						
+					}
+				}
+			
+
+			}
+
+			print TCF "\n";
+			print TCF "        # End TC Stub Code Segment\n";
+			print TCF "\n";
+		}
+		elsif($words =~ /END STUB/i){
+			print TCF "      # End TC Stub\n";
+			print TCF "\n";
+		}
+		elsif($words eq "")
+		{
+			last;
+		}
+
+		$words =<TCF_INPUT>;
+	}
+	print TCF ("    # End Test Case\n\n");
+}
+      
+     close(TCF_INPUT);
+     close(TCF); 
+
+                
+  } else
+  
+  {
+      printMessage("info", "OK",
+                "Please open .xls file formats only");
+  }
+  
+  open(SOURCE, "$tcf_file.tcf") or die "Can't open source";
+
+  $output_text1->update();
+        
+  print TEXT <SOURCE>;
+  
+  close (SOURCE);
+
+  unlink("Version.tcf");
+        
+  unlink("tcf.tcf");
+  
+  unlink("Tcf_Input.tcf");
+    
+  unlink("123.tcf");
+  
+  unlink("Version2.tcf");
+ 
+  unlink("Version3.tcf");
+  
+print "\n\n#/***************************************************\n";
+$output_text->update();
+
+print "#/***************************************************\n";
+$output_text->update();
+
+print "Please Check following module and Function Name is correct??\n";
+$output_text->update();
+
+print "Module Name is        : $MName\n";
+$output_text->update();
+
+print "Function Name is      : $FName\n";
+$output_text->update();
+
+print "Total No of Testcases : $PP\n";
+$output_text->update();
+
+print "#/***************************************************\n";
+$output_text->update();
+print "#/***************************************************\n\n\n";
+$output_text->update();
+
+
+
+      print "#/*=================================================*\n";
+      $output_text->update();
+
+      print "#||################################################\n";
+      $output_text->update();
+
+      print "#||# Now!!!Your TCF is Ready for Execution!!!!\n";
+      $output_text->update();
+
+      print "#||# Get the TCF where ever excel sheet is present\n";
+      $output_text->update();
+      
+      print "#||#   Version 2.0 Developed on Mar 06 2009  \n";
+      $output_text->update();
+
+      print "#||################################################\n";
+      $output_text->update();
+
+      print "#\*==================================================*\n";
+      $output_text->update();
+
+
+
+   printMessage("info", "OK","Your Excel sheet is successfully converted to TCF!!!!\n\nPlease get your TCF and NamingConventions\nwhere ever your excel sheet is present\n\nModule Name is         : $MName\nFunction Name is       : $FName\nTotal No of Testcases : $PP\n");  
+  
+}
+
+
+#-------------------------------------Removed Variables----------------------------
+
+sub Removed
+{
+
+$CountR=0;
+
+open(INFILE,"<$infile");
+
+    if($infile =~ /(.*)\.tcf/)
+     
+     {
+             
+        $tcf_file1 = $1;
+       
+       $tcf_file1 = join("_Removed","$tcf_file1",".tcf");
+       
+       
+        open (OUTFILE, ">$tcf_file1");
+
+
+$words =<INFILE>;
+
+while($words ne "")
+
+{  
+
+if($words =~/^      # End Text/)
+
+{
+
+print OUTFILE ("$words");
+
+print OUTFILE ("\n");
+
+print OUTFILE ("Initialization:\n");
+
+}elsif($words =~/^        # Begin Removed Variable/)
+{ 
+$CountR++;
+
+while(!(($words=~/^    # End Test Case/)||($words=~/^      # Begin TC Stub/)))
+
+{
+
+$words =<INFILE>;
+
+}
+
+print OUTFILE ("$words");
+
+}
+
+else
+
+{
+
+print OUTFILE ("$words");
+
+}
+
+$words =<INFILE>;
+
+}
+if(($CountR==0))
+{
+print "$CountR";
+printMessage("info", "OK",
+                "There is No Removed Variables to Remove");
+}else
+{
+print "";
+   printMessage("info", "OK",
+                "Your TCF is successfully  Deleted the Removed Variables");
+                }
+
+}else {
+
+    printMessage("info", "OK",
+                "Please open .tcf file formats only");
+       }
+close(INFILE);
+close(OUTFILE);
+
+
+}
+
+#-------------------------------------Validate----------------------------
+
+sub validate_TCF
+
+{
+
+open(VALINPUT,"<$infile");
+
+open(VALOUT, ">Validation.log");
+$TC=0;
+$line=<VALINPUT>;
+$linecount=$l=1;
+while($line ne "")
+{
+my $BE=($line =~/^    # Begin Test Case
+/);
+if($BE)
+{
+
+$TC++;
+
+
+}
+
+
+$re=($line =~/        # Begin Variable/);
+
+if($re)
+{
+$l=$count=1;
+while($l)
+{ 
+
+$UC=(($line =~/^          Usage = G/)||($line =~/^          Usage = H/)||($line =~/^          Usage = P/)||($line =~/^          Usage = Z/)||($line =~/^          Usage = Q/)||($line =~/^          Usage = O/));
+
+$DE=(($line =~/^          Decl_type =\Q*\E/)||($line =~/^          Decl_type =\Q *\E/)||($line =~/^          Decl_type = Uint/)||($line =~/^          Decl_type =  /)||($line =~/^          Decl_type = uint/)||($line =~/^          Decl_type = Type/)||($line =~/^          Decl_type = Int/));
+if ($count==4)
+{
+$DE1=(($line=~/\Q.\E/)||($line=~/\Q[\E/)||($line=~/\Q]\E/));
+if($DE1)
+{
+$DE1=0;
+
+
+print VALOUT "\nTEST CASE M$TC \n\n";
+print VALOUT " At line number $linecount error is there in $line \n\n";
+}
+}#---------------------------------------------------------------------------------End of if ($count==4)
+
+if($DE) 
+{$DE=0;
+
+print VALOUT "\nTEST CASE M$TC \n\n";
+print VALOUT " At line number $linecount error is there in $line \n\n";
+}else
+{
+}
+if($UC)
+{
+
+}elsif($count==5)
+{
+
+print VALOUT "\nTEST CASE M$TC \n\n";
+print VALOUT " At line number $linecount error is there in $line \n\n";
+}
+
+$line=<VALINPUT>;
+$re1=($line =~/^        # End Variable/);
+if($re1){$l=0;}
+$count++;
+$linecount++;
+
+}#---------------------------------------------------------------------------End of while($l)
+
+}#---------------------------------------------------------------------------End of if($line eq "^         # Begin Variable")
+
+
+$line=<VALINPUT>;
+$linecount++;
+}#------------------------------------------------end of for($i=0;$i<2000;$i++)
+
+
+
+print VALOUT "  \n POSSIBLE CAUSES ARE AS FOLLOWS\n";  
+print VALOUT "  \n 1.Check for merged cells having hidden data\n";  
+print VALOUT "  \n 2.Check for spaces between variable name,type and values etc\n";
+print VALOUT "  \n 3.Check for Expected outputs or intialization misspelled in your test plan\n";
+
+close(VALINPUT);
+close(VALOUT);
+
+  open(SOURCE, "Validation.log") or die "Can't open source";
+
+  $output_text1->update();
+        
+  print TEXT <SOURCE>;
+  
+  close (SOURCE);
+  
+
+}
+
+
+
+
+sub printMessage
+{
+  my ($icon, $type, $outputmsg) = @_;
+  my $msg = $mw->messageBox(-icon => $icon, -type => $type,
+  -title => $TITLE, -message => $outputmsg);
+}
+
+ sub MsgBox {
+
+    my ($caption, $message, $icon_buttons) = @_;
+    my @return = qw/- Ok Cancel Abort Retry Ignore Yes No/;
+    my $result = Win32::MsgBox($message, $icon_buttons, $caption);
+    return $return[$result];
+  }          
+
+sub newCommand
+{
+
+  system ("Automated_TCFTool.exe");
+}
+
+sub ReadMe
+
+{
+
+      $info = "Opening Readme.html... Please Wait..";
+      $status -> update();
+      
+      
+      open(READ,">Readme.html");
+      
+      print READ "<!--- 2  CENTER START TAG--->";
+      print READ "<CENTER>";
+      print READ "<!--- 3  FONT / TEXT--->";
+      
+      print READ '<FONT FACE="arial, helvetica" SIZE="5" COLOR="#0000FF">Automated TCF Tool</FONT>';
+      print READ "<BR>";
+      print READ '<FONT FACE="arial, helvetica" SIZE="4" COLOR="#0000FF">Version 2.0</FONT>';
+      print READ "</BR>";
+      
+      print READ "</CENTER>";
+      
+      print READ '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">';
+      print READ "<HTML><HEAD><TITLE>Automated TCF Tool.</TITLE>";
+      print READ '<META http-equiv=Content-Type content="text/html; charset=windows-1252"><LINK rev=made href="mailto:">';
+
+      print READ '<META content="MSHTML 6.00.2900.3429" name=GENERATOR></HEAD>';
+      print READ '<BODY><A name=__index__></A><BODY BGCOLOR="#00FFFF" LINK="#0000FF" VLINK="#0000FF"><!-- INDEX BEGIN -->';
+      print READ "<UL>";
+      print READ '<LI><A href="#name">NAME</A>';
+      
+        print READ '<LI><A href="#synopsis">SYNOPSIS</A>';
+      
+        print READ '<LI><A href="#description">DESCRIPTION</A>';
+      
+        print READ "<UL>";
+      
+      
+          print READ '<LI><A href="#Open Excel Sheet/TCF">Open Excel Sheet/TCF</A>';
+      
+          print READ '<LI><A href="#Convert to TCF">Convert to TCF</A>';
+      
+          print READ '<LI><A href="#Removed Variables">Removed Variables</A>';
+      
+          print READ '<LI><A href="#Validate TCF">Validate TCF</A>';
+      
+          print READ '<LI><A href="#Left side Text">Left side Text</A>';
+      
+          print READ '<LI><A href="#Right side Text">Right side Text</A>';
+      
+      
+          print READ '<LI><A href="#Bottom Label">Bottom Label</A>';
+      
+      
+          print READ '<LI><A href="#gui">Gui</A>';
+      
+          print READ '<LI><A href="#Exit">Exit</A>';
+      
+          print READ '<LI><A href="#Help">Help</A>';
+      
+          print READ "</LI></UL>";
+      
+      
+      
+        print READ '<LI><A href="#Features of Version 2.0">Features of Version 2.0</A>';
+      
+        print READ "<UL>";
+          print READ "<UL>";
+      
+            print READ '<LI><A href="#GUI based application">GUI based application</A>';
+      
+            print READ '<LI><A href="#Perfect Alignment of Version Info">Perfect Alignment of Version Info</A>';
+      
+            print READ '<LI><A href="#No need to remove the space in InputTable Type column">No need to remove the space in InputTable Type column</A>';
+      
+            print READ '<LI><A href="#Validate the TCF">Validate the TCF</A>';
+      
+            print READ '<LI><A href="#Output file locates in where the input file was present">Output file locates in where the input file was present</A>';
+      
+            print READ '<LI><A href="#Perfect Naming convention of Output file">Perfect Naming convention of Output file</A>';
+      
+            print READ '<LI><A href="#Reads Module Name,Function Name and Create Date automatically">Reads Module Name,Function Name and Create Date automatically</A>';
+      
+            print READ '<LI><A href="#All Naming conventions for delivery">All Naming conventions for delivery</A>';
+      
+            print READ '<LI><A href="#Delete Removed Variables">Delete Removed Variables</A>';
+            print READ "</LI></UL></UL>";
+      
+      print READ "<BR>";
+      
+      print READ "</BR>";
+      
+      
+      
+        print READ '<LI><A href="#When This Tool Fails???">When This Tool Fails???</A>';
+        print READ "</LI></UL>";
+      
+      
+      
+      
+      print READ "<P>";
+      print READ '<H1><A name=name>NAME</A></H1><FONT FACE="arial, helvetica" SIZE="4" COLOR="#FF0000">';
+      print READ "<P>Automated TCF Tool Version 2.0.</P>";
+      print READ "<P></FONT>";
+      print READ "<HR>";
+      
+      print READ "<H1><A name=synopsis>SYNOPSIS</A></H1>";
+      print READ "<P>This Tool generates the TCF(TestCaseFile),Which is input for LDRA Tool.</P>";
+      
+      print READ "<P>To convert TCF the input of this tool shoud be excel sheet only.</P>";
+      
+      print READ "<P>This Tool Removes the RemovedVariables,Which is exported from LDRA Tool.</P>";
+      
+      print READ "<P>To Remove RemovedVariables, the file input format shoud be either .tcf or .txt only.</P>";
+      
+      print READ "<P>This Tool automaticaly Validates the generated TCF,Which shows the optimization of this Tool.</P>";
+      
+      print READ "<P>To Validate already generated TCF, the file input format shoud be either .tcf or .txt only.</P>";
+      
+      print READ "<P>Currently this tool is processing following functionalities.</P>";
+      
+      print READ "<UL>";
+        print READ "<LI>Convert to TCF (Input File format should be .xls )";
+        print READ "<P></P>";
+        print READ "<LI>Removed Variables (Input File format should be .tcf or .txt )";
+        print READ "<P></P>";
+        print READ "<LI>Validate TCF(Input File format should be .tcf or .txt )";
+        print READ "<P></P>";
+        print READ "<P></P></LI></UL>";
+      print READ "<P></FONT>";
+      print READ "<HR>";
+      
+      
+      
+      print READ "<H1><A name=description>DESCRIPTION</A></H1>";
+      print READ "<P>";
+      print READ '<H2><A name="Open Excel Sheet/TCF">Open Excel Sheet/TCF</A></H2>';
+      print READ "<P>There are Two diffierent ways to Open Excel Sheet/TCF.</P>";
+      
+      print READ "<UL>";
+        print READ "<LI>Go to File Menu and click on Open Excel Sheet/TCF.";
+        print READ "<P></P>";
+        print READ "<LI>Click on first Open Button.";
+        print READ "<P></P>";
+        print READ "</LI></UL>";
+      
+      print READ "<P>Functionality of this button is,</P>";
+      
+      print READ "<UL>";
+        print READ "<LI>Once you click on this button it will open dialog box to choose input file.";
+        print READ "<P></P>";
+        print READ "<LI>This button holds the file which you opened.";
+        print READ "<P></P>";
+        print READ "<LI>If you open .xls file, the Convert to TCF button will be enable to process further.";
+        print READ "<P></P>";
+        print READ "<LI>If you open .tcf file, the Removed Variables and Validate TCF buttons will be enable to process further.";
+        print READ "<P></P>";
+      
+        print READ "</LI></UL>";
+      
+      
+        print READ "</P>";
+      
+      
+        print READ '<H2><A name="Convert to TCF">Convert to TCF</A></H2>';
+        print READ "<P>There are Three diffierent ways to Convert excel sheet to TCF.</P>";
+      
+        print READ "<UL>";
+          print READ "<LI>Go to Converter Menu and click on Convert to TCF.";
+          print READ "<P></P>";
+          print READ "<LI>Click on the Button Convert to TCF.";
+          print READ "<P></P>";
+          print READ "<LI>Press Ctrl+T from Key board..";
+          print READ "<P></P>";
+          print READ "</LI></UL>";
+        print READ "<P>Functionality of this button is,</P>";
+      
+        print READ "<UL>";
+        print READ "<LI>Once you open .xls file, the Convert to TCF button will be enable to convert.";
+        print READ "<P></P>";
+        print READ "<LI>Once you click on this button, it will show message box saying that Have you checked Junk Data in MergedCells?? and";
+         print READ "<P>Have you Given Z (Instead of I) in the I/O section for Parameters??";
+        print READ "</P>";
+        print READ "<LI>Your Input file should match with Sample.xls,Then only your TCF generates properly.";
+        print READ "<P></P>";
+        print READ "<LI>In Leftside text it will show the status as which row of excel sheet is running.";
+        print READ "<P></P>";
+        print READ "<LI>Finally it will show the message box saying that your Excel sheet is succesfully converted to TCF,";
+        print READ "<P>Please get your TCF where ever your excel sheet is present and";
+        print READ "<P>Module Name,Function Name and Total No of Testcases.";
+        print READ "</P>";
+        print READ "</LI></UL></P>";
+        print READ "</P>";
+      
+      
+        print READ "<P>";
+        print READ '<H2><A name="Removed Variables">Removed Variables</A></H2>';
+      
+      
+        print READ "<P>There are Two diffierent ways to Delete Removed Variables from TCF file.</P>";
+      
+        print READ "<UL>";
+          print READ "<LI>Go to RemovedVariables Menu and click on Removed Variables.";
+          print READ "<P></P>";
+          print READ "<LI>Click on the Button Removed Variables.";
+          print READ "<P></P>";
+          print READ "</LI></UL>";
+        print READ "<P>Functionality of this button is,</P>";
+      
+        print READ "<UL>";
+        print READ "<LI>Once you open .tcf file, the Removed Variables button will be enable to Delete Removed Variables.";
+        print READ "<P></P>";
+        print READ "<LI>Once you click on this button, it will show message box saying that Your TCF is successfully Deleted the Removed Variables(If TCF have Removed Variables)";
+        print READ "<P></P>";
+        print READ "<LI>If your TCF does not have any Removed variables, it will show message box saying that there is No removed variables to remove.";
+        print READ "</P>";
+        print READ "</LI></UL></P>";
+        print READ "</P>";
+      
+        print READ "<P>";
+        print READ '<H2><A name="Validate TCF">Validate TCF</A></H2>';
+      
+      
+        print READ "<P>There are Two diffierent ways to validate TCF.</P>";
+      
+        print READ "<UL>";
+          print READ "<LI>Go to ValidateTCF Menu and click on Validate TCF.";
+          print READ "<P></P>";
+          print READ "<LI>Click on the Button Validate TCF.";
+          print READ "<P></P>";
+          print READ "<LI>Also it will automatically validate TCF when you convert excel sheet to TCF.";
+          print READ "<P></P>";
+          print READ "</LI></UL>";
+            print READ "<P>Functionality of this button is,</P>";
+      
+      	  print READ "<UL>";
+      	  print READ "<LI>Once you open .tcf file, the Validate TCF button will be enable to Validate TCF file.";
+      	  print READ "<P></P>";
+      	  print READ "<LI>Once you click on this button, it will show message box saying that Your TCF is successfully Validated.";
+      	  print READ "<P></P>";
+      	  print READ "<LI>Please check Validate.log file or Right side text(It will show the preview of the validate.log).";
+            print READ "<P>";
+           print READ "Currently this tool will validates the following mistakes.";
+            print READ "</P>";
+      	  	    print READ "<LI>If any junk data perhaps.";
+      	  	    print READ "<P></P>";
+      	  	    print READ "<LI>If Usage is wrong.";
+      	  	    print READ "<P></P>";
+      	  	    print READ "<LI>If declaration type is missed.";
+      	    print READ "<P></P>";
+      	  print READ "</P>";
+        print READ "</LI></UL></P>";
+          print READ "</P>";
+      
+          print READ "<P>";
+          print READ '<H2><A name="Left side Text">Left side Text</A></H2>';
+      
+      
+          print READ "<P>Left side Text shows the preview of excel sheet running.</P>";
+          print READ "</P>";
+      
+      
+       print READ "<P>";
+       print READ '<H2><A name="Right side Text">Right side Text</A></H2>';
+      
+      
+       print READ "<P>Right side Text shows the preview of TCF file and Validate.</P>";
+      
+       print READ "</P>";
+      
+        print READ "<P>";
+        print READ '<H2><A name="Bottom Label">Bottom Label</A></H2>';
+      
+      
+        print READ "<P>The Bottom Label shows the following status.</P>";
+      
+        print READ "<UL>";
+          print READ "<LI>Status of Opening .xls/.tcf/.txt File.";
+          print READ "<P></P>";
+          print READ "<LI>Which file has been Opened.";
+          print READ "<P></P>";
+          print READ "<LI>Status of excel sheet running.";
+          print READ "<P></P>";
+          print READ "<LI>Status of opening Readme.html.";
+          print READ "<P></P>";
+        print READ "</LI></UL></P>";
+      
+      
+        print READ "<P>";
+        print READ '<H2><A name="gui">GUI</A></H2>';
+      
+      
+        print READ "<P>This GUI(Graphical User Interface) is developed by using Perl scripting language .</P>";
+        print READ "<P>Each and every button/Lable/Text is having attached baloon(Text),which shows the functionality of those buttons .</P>";
+        print READ "</P>";
+      
+        print READ "<P>";
+        print READ '<H2><A name="Exit">Exit</A></H2>';
+      
+      
+        print READ "<P>This exit button kills the entire application and close the application.</P>";
+        print READ "<P>For best usage use this Exit Button.</P>";
+        print READ "</P>";
+      
+        print READ "<P>";
+        print READ '<H2><A name="Help">Help</A></H2>';
+      
+      
+        print READ "<P>If Any mistakes or the generation of TCF is not proper, please refer Help.</P>";
+        print READ "<P>If TCF is not generating properly please Refer Sample.xls for referance.</P>";
+        print READ "<P>Please Check all the words are matching in your excel sheet ,where it is present in Sample.xls.</P>";
+        print READ "<P>Please Check the Junk data by unmerging your entire excel sheet.</P>";
+        print READ "<P>There should not be 10 blank rows continually(If blank rows are greater than 10,This tool will not generates TCF).</P>";
+      
+        print READ "</P>";
+      
+      
+      
+      
+      
+        print READ '<H1><A name="Features of Version 2.0">Features of Version 2.0</A></H1>';
+        print READ "<P>";
+      
+        print READ '<H2><A name="GUI based application">GUI based application</A></H2>';
+        print READ "<P>Full visualization and user friendly.</P></P>";
+      
+          print READ '<H2><A name="Perfect Alignment of Version Info">Perfect Alignment of Version Info</A></H2>';
+          print READ "<P>Perfect Alignment of Version Info .</P>";
+      
+          print READ '<H2><A name="No need to remove the space in InputTable Type column">No need to remove the space in InputTable Type column</A></H2>';
+          print READ "<P>No need to remove the space in Input Table section of Type column.</P>";
+      
+          print READ '<H2><A name="Validate the TCF">Validate the TCF</A></H2>';
+          print READ "<P>This feature works if any of the following mistakes perhaps in your testscript.</P>";
+      
+            print READ "<UL>";
+      	    print READ "<LI>If any junk data perhaps.";
+      	    print READ "<P></P>";
+      	    print READ "<LI>If Usage is wrong.";
+      	    print READ "<P></P>";
+      	    print READ "<LI>If declaration type is missed.";
+      	    print READ "<P></P>";
+              print READ "</LI></UL></P>";
+      
+            print READ '<H2><A name="Output file locates in where the input file was present">Output file locates in where the input file was present</A></H2>';
+            print READ "<P>Output file locates in where the input file was present.</P>";
+      
+            print READ '<H2><A name="Perfect Naming convention of Output file">Perfect Naming convention of Output file</A></H2>';
+            print READ "<P>Perfect Naming convention of Output file.</P>";
+      
+            print READ '<H2><A name="Reads Module Name,Function Name and Create Date automatically">Reads Module Name,Function Name and Create Date automatically</A></H2>';
+            print READ "<P>Reads Module Name,Function Name and Create Date automatically(So no need to give any data in file_name.tcf).</P>";
+      
+            print READ '<H2><A name="All Naming conventions for delivery">All Naming conventions for delivery</A></H2>';
+            print READ "<P>This tool genarates Naming conventions which requires for delivery.</P>";
+            print READ "<P>The Naming conventions file locates where ever excel sheet is presents.</P>";
+      
+            print READ '<H2><A name="Delete Removed Variables">Delete Removed Variables</A></H2>';
+            print READ "<P>This is one more added feature in version 2.0.</P>";
+      
+            print READ "<P>Some times there may be Removed variables perhaps in exported TCF file from LDRA Tool.</P>";
+            print READ "<P>So this tool removes those variables automatically.</P>";
+      
+      
+        print READ '<H1><A name="When This Tool Fails???">When This Tool Fails???</A></H1>';
+        print READ "<P>";
+        print READ "<P>1.If your Excel sheet words does not match with the words(Marked in Bold) present in Sample.xls.</P>";
+        print READ "<P>2.In TCF ,If it is printing None more than ones in single testcase means,either you may for got to give I/O or Value or Name or Type.</P>";
+        print READ "<P>3.In TCF ,If it is printing Initialization of Output Variables more than ones in single testcase means,There is a junk data is present in your excel sheet.</P>";
+        print READ "<P>4.There should not be 10 blank rows continually(If blank rows are greater than 10,This tool will not generates TCF).</P>";
+      
+        print READ "</P>";
+      
+            
+        close(READ);
+ system("D:\\GUI\\Readme.html");         
+      
+  }
+  
+  
+  
+
