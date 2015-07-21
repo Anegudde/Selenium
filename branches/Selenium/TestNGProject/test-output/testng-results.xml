@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="3" passed="3">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="39" started-at="2015-07-21T07:04:13Z" finished-at="2015-07-21T07:04:13Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="39" started-at="2015-07-21T07:04:13Z" finished-at="2015-07-21T07:04:13Z">
+      <class name="com.qspiders.Users">
+        <test-method status="PASS" signature="launch()[pri:0, instance:com.qspiders.Users@9f0666]" name="launch" is-config="true" duration-ms="10" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- launch -->
+        <test-method status="PASS" signature="createUser()[pri:0, instance:com.qspiders.Users@9f0666]" name="createUser" duration-ms="6" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- createUser -->
+        <test-method status="PASS" signature="login()[pri:0, instance:com.qspiders.Users@9f0666]" name="login" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- login -->
+        <test-method status="PASS" signature="logout()[pri:0, instance:com.qspiders.Users@9f0666]" name="logout" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- logout -->
+        <test-method status="PASS" signature="editUser()[pri:0, instance:com.qspiders.Users@9f0666]" name="editUser" duration-ms="2" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- editUser -->
+        <test-method status="PASS" signature="login()[pri:0, instance:com.qspiders.Users@9f0666]" name="login" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- login -->
+        <test-method status="PASS" signature="logout()[pri:0, instance:com.qspiders.Users@9f0666]" name="logout" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- logout -->
+        <test-method status="PASS" signature="deleteUser()[pri:0, instance:com.qspiders.Users@9f0666]" name="deleteUser" duration-ms="2" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- deleteUser -->
+        <test-method status="PASS" signature="login()[pri:0, instance:com.qspiders.Users@9f0666]" name="login" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- login -->
+        <test-method status="PASS" signature="logout()[pri:0, instance:com.qspiders.Users@9f0666]" name="logout" is-config="true" duration-ms="1" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- logout -->
+        <test-method status="PASS" signature="quit()[pri:0, instance:com.qspiders.Users@9f0666]" name="quit" is-config="true" duration-ms="0" started-at="2015-07-21T12:34:13Z" finished-at="2015-07-21T12:34:13Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- quit -->
+      </class> <!-- com.qspiders.Users -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>

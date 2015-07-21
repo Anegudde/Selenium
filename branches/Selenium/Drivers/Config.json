@@ -1,0 +1,26 @@
+{
+  "capabilities":
+      [
+        {
+          "browserName": "firefox",
+          "platform": "WINDOWS",
+          "maxInstances": 10
+        },
+        {
+          "browserName": "chrome",
+          "maxInstances": 2
+        },
+        {
+          "browserName": "internet explorer",
+          "maxInstances": 2
+        }
+      ],
+  "configuration":
+  {
+    "maxSession": 6,
+    "port": 4444,
+    "register": true,
+    "registerCycle": 5000,
+    "timeout": 120000,
+  }
+}

@@ -1,0 +1,3 @@
+cd "C:\\Users\\vikram.uk\\workspace\\TestNG1-W"
+rem java -cp "C:\\Users\\vikram.uk\\workspace\\Lib;C:\\Users\\vikram.uk\\workspace\\Drivers;." org.testng.TestNG "C:\\Users\\vikram.uk\\workspace\\TestNG1-W\TestNG-TestExclude.xml"
+java -cp "C:\\Users\\vikram.uk\\workspace\\Lib;C:\\Users\\vikram.uk\\workspace\\Drivers;." org.testng.TestNG   "C:\Users\vikram.uk\workspace\TestNG1-W\parallel.SeGridTestConf.xml"

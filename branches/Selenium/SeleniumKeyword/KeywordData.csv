@@ -1,0 +1,8 @@
+TestCase,Locator Type,Locator Value,TestData
+open_Browser,null,null,Chrome
+enter_URL,null,null,http://google.com
+click_On_Link,linkText,Gmail,
+enter_Text,id,Email,testuser
+enter_Text,name,Passwd,passwordtest
+click_On_Button,name,signIn,
+close_Browser,,,

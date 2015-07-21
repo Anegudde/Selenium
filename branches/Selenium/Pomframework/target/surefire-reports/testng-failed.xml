@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite verbose="0" name="Failed suite [Command line suite]">
+  <test name="Command line test(failed)">
+    <classes>
+      <class name="com.application.tests.CreateBillingTest">
+        <methods>
+          <include name="launch"/>
+          <include name="testCreateBilling"/>
+        </methods>
+      </class> <!-- com.application.tests.CreateBillingTest -->
+      <class name="com.application.tests.DeleteBillingTest">
+        <methods>
+          <include name="testDeleteBilling"/>
+        </methods>
+      </class> <!-- com.application.tests.DeleteBillingTest -->
+    </classes>
+  </test> <!-- Command line test(failed) -->
+</suite> <!-- Failed suite [Command line suite] -->

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="8" passed="8">
+  <reporter-output>
+  </reporter-output>
+  <suite name="TestAll" duration-ms="74" started-at="2015-07-20T12:20:14Z" finished-at="2015-07-20T12:20:15Z">
+    <groups>
+      <group name="orderBo">
+        <method signature="TestOrderOrder.testFindOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testFindOrder" class="parallel.TestOrderOrder"/>
+        <method signature="TestOrderOrder.testMakeEmptyOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeEmptyOrder" class="parallel.TestOrderOrder"/>
+        <method signature="TestOrderOrder.testMakeOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeOrder" class="parallel.TestOrderOrder"/>
+        <method signature="TestOrderOrder.testUpdateOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testUpdateOrder" class="parallel.TestOrderOrder"/>
+      </group> <!-- orderBo -->
+      <group name="save">
+        <method signature="TestOrderOrder.testMakeEmptyOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeEmptyOrder" class="parallel.TestOrderOrder"/>
+        <method signature="TestOrderOrder.testMakeOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeOrder" class="parallel.TestOrderOrder"/>
+      </group> <!-- save -->
+      <group name="brokenTests">
+        <method signature="TestDataBaseOrder.testConnectMySQL()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMySQL" class="parallel.TestDataBaseOrder"/>
+      </group> <!-- brokenTests -->
+      <group name="db-nosql">
+        <method signature="TestDataBaseOrder.testConnectMongoDB()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMongoDB" class="parallel.TestDataBaseOrder"/>
+      </group> <!-- db-nosql -->
+      <group name="db">
+        <method signature="TestDataBaseOrder.testConnectMsSQL()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMsSQL" class="parallel.TestDataBaseOrder"/>
+        <method signature="TestDataBaseOrder.testConnectMySQL()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMySQL" class="parallel.TestDataBaseOrder"/>
+        <method signature="TestDataBaseOrder.testConnectOracle()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectOracle" class="parallel.TestDataBaseOrder"/>
+      </group> <!-- db -->
+    </groups>
+    <test name="order" duration-ms="20" started-at="2015-07-20T12:20:14Z" finished-at="2015-07-20T12:20:14Z">
+      <class name="parallel.TestOrderOrder">
+        <test-method status="PASS" signature="testFindOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testFindOrder" duration-ms="5" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testFindOrder -->
+        <test-method status="PASS" signature="testMakeEmptyOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeEmptyOrder" duration-ms="1" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testMakeEmptyOrder -->
+        <test-method status="PASS" signature="testMakeOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testMakeOrder" duration-ms="1" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testMakeOrder -->
+        <test-method status="PASS" signature="testUpdateOrder()[pri:0, instance:parallel.TestOrderOrder@1f2a7d5]" name="testUpdateOrder" duration-ms="0" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testUpdateOrder -->
+      </class> <!-- parallel.TestOrderOrder -->
+      <class name="parallel.TestConfigOrder">
+        <test-method status="PASS" signature="testBeforeTest()[pri:0, instance:parallel.TestConfigOrder@1a06946]" name="testBeforeTest" is-config="true" duration-ms="1" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testBeforeTest -->
+        <test-method status="PASS" signature="testAfterTest()[pri:0, instance:parallel.TestConfigOrder@1a06946]" name="testAfterTest" is-config="true" duration-ms="0" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testAfterTest -->
+      </class> <!-- parallel.TestConfigOrder -->
+    </test> <!-- order -->
+    <test name="database" duration-ms="6" started-at="2015-07-20T12:20:15Z" finished-at="2015-07-20T12:20:15Z">
+      <class name="parallel.TestDataBaseOrder">
+        <test-method status="PASS" signature="testConnectMongoDB()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMongoDB" duration-ms="1" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testConnectMongoDB -->
+        <test-method status="PASS" signature="testConnectMsSQL()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMsSQL" duration-ms="0" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testConnectMsSQL -->
+        <test-method status="PASS" signature="testConnectMySQL()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectMySQL" duration-ms="1" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testConnectMySQL -->
+        <test-method status="PASS" signature="testConnectOracle()[pri:0, instance:parallel.TestDataBaseOrder@1e0f4f]" name="testConnectOracle" duration-ms="1" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testConnectOracle -->
+      </class> <!-- parallel.TestDataBaseOrder -->
+      <class name="parallel.TestConfigOrder">
+        <test-method status="PASS" signature="testBeforeSuite()[pri:0, instance:parallel.TestConfigOrder@107ec20]" name="testBeforeSuite" is-config="true" duration-ms="8" started-at="2015-07-20T17:50:14Z" finished-at="2015-07-20T17:50:14Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testBeforeSuite -->
+        <test-method status="PASS" signature="testBeforeTest()[pri:0, instance:parallel.TestConfigOrder@107ec20]" name="testBeforeTest" is-config="true" duration-ms="1" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testBeforeTest -->
+        <test-method status="PASS" signature="testAfterTest()[pri:0, instance:parallel.TestConfigOrder@107ec20]" name="testAfterTest" is-config="true" duration-ms="0" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testAfterTest -->
+        <test-method status="PASS" signature="testAfterSuite()[pri:0, instance:parallel.TestConfigOrder@107ec20]" name="testAfterSuite" is-config="true" duration-ms="0" started-at="2015-07-20T17:50:15Z" finished-at="2015-07-20T17:50:15Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testAfterSuite -->
+      </class> <!-- parallel.TestConfigOrder -->
+    </test> <!-- database -->
+  </suite> <!-- TestAll -->
+</testng-results>

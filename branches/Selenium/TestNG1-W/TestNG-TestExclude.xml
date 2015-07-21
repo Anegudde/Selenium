@@ -1,0 +1,18 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+ 
+<suite name="TestAll">
+ 
+  <test name="database">
+	<groups>
+		<run>
+			<exclude name="brokenTests" />
+			<include name="db" />
+		</run>
+	</groups>
+ 
+	<classes>
+		<class name="parallel.TestDataBaseOrder" />
+	</classes>
+  </test>
+ 
+</suite>

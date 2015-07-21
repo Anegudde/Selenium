@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/junit-4.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-java-1.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-html-0.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-core-1.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/log4j-1.2.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/gherkin-2.12.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/selenium-java-2.46.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

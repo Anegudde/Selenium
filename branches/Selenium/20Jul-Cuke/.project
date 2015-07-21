@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<projectDescription>
+<name>20Jul-Cuke</name>
+<comment/>
+<projects/>
+<buildSpec>
+<buildCommand>
+<name>org.eclipse.jdt.core.javabuilder</name>
+<arguments/>
+</buildCommand>
+</buildSpec>
+<natures>
+<nature>org.eclipse.jdt.core.javanature</nature>
+<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
+</natures>
+</projectDescription>

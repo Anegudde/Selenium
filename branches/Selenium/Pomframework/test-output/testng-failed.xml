@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Failed suite [Default suite]" parallel="classes">
+  <test name="Default test(failed)" parallel="classes">
+    <classes>
+      <class name="com.application.tests.LoginLogout">
+        <methods>
+          <include name="launch"/>
+          <include name="testLoginLogout"/>
+        </methods>
+      </class> <!-- com.application.tests.LoginLogout -->
+      <class name="com.application.tests.DeleteBillingTest">
+        <methods>
+          <include name="launch"/>
+          <include name="testDeleteBilling"/>
+        </methods>
+      </class> <!-- com.application.tests.DeleteBillingTest -->
+      <class name="com.application.tests.CreateBillingTest">
+        <methods>
+          <include name="launch"/>
+          <include name="testCreateBilling"/>
+        </methods>
+      </class> <!-- com.application.tests.CreateBillingTest -->
+    </classes>
+  </test> <!-- Default test(failed) -->
+</suite> <!-- Failed suite [Default suite] -->

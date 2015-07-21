@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="2" passed="2">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Sample Test Suite" duration-ms="34" started-at="2015-07-17T10:38:11Z" finished-at="2015-07-17T10:38:11Z">
+    <groups>
+    </groups>
+    <test name="Method Test Cases" duration-ms="34" started-at="2015-07-17T10:38:11Z" finished-at="2015-07-17T10:38:11Z">
+      <class name="OptionalParamExample">
+        <test-method status="PASS" signature="testOptionParamOne(java.lang.String)[pri:0, instance:OptionalParamExample@2c22f3]" name="testOptionParamOne" duration-ms="17" started-at="2015-07-17T16:08:11Z" finished-at="2015-07-17T16:08:11Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[Vikram]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testOptionParamOne -->
+        <test-method status="PASS" signature="testOptionParamTwo(java.lang.String)[pri:0, instance:OptionalParamExample@2c22f3]" name="testOptionParamTwo" duration-ms="1" started-at="2015-07-17T16:08:11Z" finished-at="2015-07-17T16:08:11Z">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[Testing]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- testOptionParamTwo -->
+      </class> <!-- OptionalParamExample -->
+    </test> <!-- Method Test Cases -->
+  </suite> <!-- Sample Test Suite -->
+</testng-results>

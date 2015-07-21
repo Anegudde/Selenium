@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite name="Suite" parallel="true">
+  <test name="Test">
+    <classes>
+          <class name="com.hascode.tutorial.RemoteDriverTest"/>
+    </classes>
+  </test>
+  <test name="Test">
+    <classes>
+          <class name="com.hascode.tutorial.WebPageTest"/>
+    </classes>
+  </test>
+  <classes></classes><!-- Test -->
+</suite> <!-- Suite -->

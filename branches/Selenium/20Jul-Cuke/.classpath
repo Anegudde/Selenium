@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-java-1.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-html-0.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-core-1.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/hamcrest-core-1.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/hamcrest-library-1.3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

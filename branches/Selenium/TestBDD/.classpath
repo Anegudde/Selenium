@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-junit-1.2.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/junit-4.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/selenium-java-2.46.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-java-1.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-junit-1.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/gson-2.3.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/junit-4.11.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Drivers/selenium-server-standalone-2.39.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Drivers/selenium-java-2.44.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Drivers/selenium-java-2.44.0-srcs.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-core-1.2.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-java-1.2.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
