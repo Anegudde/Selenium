@@ -1,0 +1,17 @@
+VTM Pressure ECID
+ AtmosphericPressure
+ PurgePressure
+ VentPressureThreshold
+ VentTimeoutInSeconds
+ PumpPressureThreshold
+ AtmosphericPressureMargin
+ BasePressure
+ BasePressureMargin
+ TargetTimeoutInSeconds
+ PumpTimeoutInSeconds
+ PumpPurgeCycle
+ TransferPressure
+ TransferPressureMargin
+ WaitBeforePumpValvesClose
+ WaitTimeToStabilizeTransferPressure
+ NumberOfRetriesToTransferPressure

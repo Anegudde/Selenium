@@ -1,0 +1,7 @@
+As a user of Galaxy software I shall be able to have the following added to the Performance Counter for step transition
+
+a. Step number along with loop information also published as performance counter.
+
+b. Log Max of step transition time instead of average step transition time. While logging the max step transition time, also log the step reference number.
+
+c. Log all step time stamping in log file.

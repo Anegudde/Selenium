@@ -1,0 +1,155 @@
+#!/usr/bin/perl
+=cut;
+/***************************************************************
+Description: Check for indentation standards(Multiple 4 space)
+
+Author: Dileep
+
+Revision history
+****************************************************************
+rev.no	 Name	  Date 		Description
+0.1 	Dileep 	18 June 09	Intial draft
+****************************************************************
+***************************************************************/
+=cut;
+
+#enter the directory path 
+print ("enter the directory path where the files are present\n"); 
+$dir_path = <STDIN>;
+chomp($dir_path);
+
+#opens the directory
+opendir( HD, $dir_path ) || die("cannot open directory");
+
+#opens the error.log file
+open(fp_err,">$dir_path/error.log") || die ("cant open file error.log\n");
+print fp_err "Indentation at following line no's are not as per standards.\n";
+print fp_err "--------------------------------------------------------------------\n";
+
+$line_cnt = 0;
+$cm_cnt =1;
+@indt_arr = (0);
+
+#perfom for all the files in the directory.
+while($filename = readdir(HD))
+{
+	@file_name_arr = split(/\./, $filename);
+	
+	if ( ( $file_name_arr[1] eq "c" ) ||
+	     ( $file_name_arr[1] eq "cpp" ) ||
+	     ( $file_name_arr[1] eq "h" ) )
+	{
+		#opens the file inside the dir
+      		open( fp,"$dir_path/$filename" ) || die ( "cant open file $filename\n"); 
+
+		while ( ($line = <fp>)  ne "")	
+		{
+			$line_cnt++;
+
+			#blank line and single line comment
+			if( ( $line =~ /^\s*[\/][*].*[*][\/]\s*$/ ) || ( $line =~ /^\s*$/ ) ) 
+			{	
+				next;
+			}
+			
+			# remove #if to #endif block function headers
+			elsif ( $line =~ /^\s*#if/ )
+			{
+				while( ( ( $line = <fp>) ne "" ) && (!( $line =~ /^s*#endif/ ) ) )
+				{
+					$line_cnt++;
+				}
+				if( $line =~ /^s*#endif/ )
+				{
+					$line_cnt++;
+					next;
+				}
+			}
+
+			elsif ( $line =~ /^\s*[\/][*]/ )
+			{ 
+				if ( $line =~ /[*][\/]\s*\w*/)
+				{
+					break;
+				}
+				else
+				{
+					do
+					{
+						if ( ( $line = <fp>)  eq "")
+						{							
+							&end1;
+						}
+						$line_cnt++;
+
+					}while(!( $line =~ /[*][\/]/ )) ;
+			
+					if ( ($line =~ /[*][\/]/) && ( !( $line =~ /[\/][*]/) ) )
+					{
+						next;
+					}
+				}
+			}
+
+			if ( ( $line =~ /[=]\s*$/ ) || ( $line =~ /[*]\s*$/ ) || ( $line =~ /&\s*$/ ) || 
+			     ( $line =~ /[|]\s*$/ ) || ( $line =~ /[>]\s*$/ ) || ( $line =~ /[.]\s*$/ ) || 
+			     ( $line =~ /[+]\s*$/ ) || ( $line =~ /[\]]\s*$/) || ( $line =~ /[<]\s*$/ ) ||
+			     ( $line =~ /\(\s*$/  ) || (($line =~ /["]\s*$/ ) && !( $line =~ /.h["]\s*$/ ))|| 
+			     ( $line =~ /,\s*$/ ) )
+			{
+			        &process;
+			        do{
+			       		if ( ( $line = <fp>)  eq "")
+			        	{
+			      		 	&end1;
+			        	}
+			       		$line_cnt++;
+			        }while ( !( ( $line =~ /\)\s*$/ ) || ( $line =~ /;\s*$/ ) ) );			       	
+			       	next;
+			}			
+			&process;
+		}
+label2:		print fp_err "$filename:\n";
+		if ( $indt_cnt > 0)
+		{
+			print fp_err "@indt_arr ";
+		}
+		print fp_err "\n----------------------------------------------------------------\n";
+		$indt_cnt =0;
+		$line_cnt = 0;
+		@indt_arr = (0);
+		close(fp);
+	}	
+}
+closedir(HD);
+close(fp_err);
+
+sub end1{   
+	goto label2;
+}
+
+#Subroutine to process the indentation check
+sub process{
+	@arr = split(// , $line);
+	$spc_cnt =0;
+	
+	foreach (@arr)
+	{
+		if( ($_ =~ /\S/) )
+		{
+			goto end2;
+		}
+		else
+		{
+			$spc_cnt++;
+		}
+	}
+	end2:		
+		$rem = ($spc_cnt) % 4; #chk if the no of spaces is multiple of 4
+		
+		if ( !($rem == 0 ) )
+		{		
+			$indt_arr[$indt_cnt++] = $line_cnt;
+			$indt_lin_arr[$indt_cnt++] = $line;
+		}		
+}		
