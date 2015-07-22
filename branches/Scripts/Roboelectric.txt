@@ -1,0 +1,21 @@
+References:
+http://www.softwaretestingmagazine.com/knowledge/open-source-android-testing-tools/
+
+Roboelectric
+https://github.com/cucumber/cucumber-jvm/tree/master/android
+http://www.vogella.com/tutorials/Robolectric/article.html
+
+https://github.com/cucumber/cucumber-jvm/pull/597
+Eclipse Plugin:  https://rgladwell.github.io/m2e-android/
+
+Command options:
+		adb shell am instrument -w com.mypackage.app.test/cucumber.api.android.CucumberInstrumentation
+		adb shell am instrument -w -e key value com.mypackage.app.test/cucumber.api.android.CucumberInstrumentation
+		
+		CUCUMBER_OPTIONS="--format pretty --strict" adb shell am instrument -w com.mypackage.app.test/cucumber.api.android.CucumberInstrumentation
+		https://stackoverflow.com/questions/5758712/bdd-android-ui-testing-framework
+		
+Robotium:
+	https://code.google.com/p/robotium/wiki/Getting_Started
+
+https://codeload.github.com/upgundecha/BmiCalculator/zip/master	
