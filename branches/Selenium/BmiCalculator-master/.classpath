@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="bmicalculator.test/src/test/java"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/junit-4.12.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/vikram.uk/workspace/Lib/selenium-java-2.46.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-variables-0.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-junit-1.2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-test-runner-142.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/vikram.uk/workspace/Lib/cucumber-jvm-deps-1.0.5.jar"/>
+	<classpathentry kind="output" path="bmicalculator.test/target/test-classes"/>
+</classpath>
