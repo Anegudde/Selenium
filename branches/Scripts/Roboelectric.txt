@@ -18,4 +18,8 @@ Command options:
 Robotium:
 	https://code.google.com/p/robotium/wiki/Getting_Started
 
-https://codeload.github.com/upgundecha/BmiCalculator/zip/master	
+https://codeload.github.com/upgundecha/BmiCalculator/zip/master
+https://codeload.github.com/cucumber/cucumber-jvm/zip/master	
+
+Code Coverage:
+https://stackoverflow.com/questions/12105337/code-coverage-for-android-calabash-android-bdd?rq=1
