@@ -1,21 +1,23 @@
 package bmicalculator.test;
 
-/**
- * Created with IntelliJ IDEA.
- * User: upgundecha
- * Date: 02/05/13
- * Time: 10:46 PM
- * To change this template use File | Settings | File Templates.
- */
-
-import cucumber.junit.Cucumber;
 import org.junit.runner.RunWith;
+/*import cucumber.annotation.*;
+import cucumber.annotation.en.*;*/
+
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
 
 @RunWith(Cucumber.class)
-@Cucumber.Options(format = {
-		"pretty", 
+@CucumberOptions (
+		/*"pretty", 
 		"html:target/cucumber-html-report",
-		"json-pretty:target/cucumber-report.json"})
+		"json-pretty:target/cucumber-report.json"})*/
+		plugin={
+				"pretty",
+				"html:target/cucumber-html-report",
+				"tags:ios-sauce"
+			   }
+		)
 public class RunCukesTest {
 
 }

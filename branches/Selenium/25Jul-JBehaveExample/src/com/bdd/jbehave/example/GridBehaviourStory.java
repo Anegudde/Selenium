@@ -1,0 +1,35 @@
+package com.bdd.jbehave.example;
+
+import org.jbehave.core.configuration.Configuration;
+import org.jbehave.core.configuration.MostUsefulConfiguration;
+import org.jbehave.core.junit.JUnitStory;
+import org.jbehave.core.steps.InjectableStepsFactory;
+import org.jbehave.core.steps.InstanceStepsFactory;
+
+import com.bdd.jbehave.specs.StackbehaviourSteps;
+
+
+public class GridBehaviourStory extends JUnitStory {
+
+	
+	 @Override 
+	    public Configuration configuration() { return new MostUsefulConfiguration(); }
+
+/*	public Configuration configuration() {return new MostUsefulConfiguration()
+            // where to find the stories
+            .useStoryLoader(new LoadFromClasspath(this.getClass()))  
+            // CONSOLE and TXT reporting
+            .useStoryReporterBuilder(new StoryReporterBuilder().withDefaultFormats().withFormats(Format.CONSOLE, Format.TXT)); 
+    }
+*/
+	@Override
+	public InjectableStepsFactory stepsFactory() {
+	    return new InstanceStepsFactory(configuration(), new GridSteps());   
+	}
+/*    // Here we specify the steps classes
+    @Override
+    public InjectableStepsFactory stepsFactory() {        
+        // varargs, can have more that one steps classes
+        return new InstanceStepsFactory(configuration(), new GridSteps());
+    }*/
+}
