@@ -1,0 +1,951 @@
+TestRunner.java
+
+package CucumberTest;
+ 
+import org.junit.runner.RunWith;
+
+import cucumber.api.CucumberOptions;
+import cucumber.api.junit.Cucumber;
+ 
+@RunWith(Cucumber.class)
+@CucumberOptions(
+		features = "Feature"
+		,glue={"StepDefinition"},
+		//format = {"html:cucumber.html"}
+		format = { "junit:cucumber.xml"}
+		//format = {"json:cucumber.json"}
+		)
+ 
+public class TestRunner {
+ 
+}
+
+TestSteps.java
+package StepDefinition;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+ 
+import java.util.concurrent.TimeUnit;
+ 
+ 
+import cucumber.api.java.en.Given;
+import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
+ 
+public class Test_Steps {
+	String str1 = new String ("abc");
+    String str2 = new String ("abc");
+    String str3 = null;
+    String str4 = "abc";
+    String str5 = "abc";
+	@Given("^ultrasound disconnection notification is displayed at the notification area of uncompressed$")
+	public void ultrasound_disconnection_notification_is_displayed_at_the_notification_area_of_uncompressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertEquals(str1, str2);
+	}
+
+	@When("^I reconnect the ultrasound transducer$")
+	public void i_reconnect_the_ultrasound_transducer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertEquals(str1, str2);
+	}
+
+	@Then("^I should not see the ultrasound disconnection notification$")
+	public void i_should_not_see_the_ultrasound_disconnection_notification() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertEquals(str1, str2);
+	}
+
+	@Given("^ultrasound disconnection notification is displayed at the notification area of compressed$")
+	public void ultrasound_disconnection_notification_is_displayed_at_the_notification_area_of_compressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertEquals(str1, str2);
+	}
+
+	@Given("^ultrasound disconnection notification is displayed at the notification area of large$")
+	public void ultrasound_disconnection_notification_is_displayed_at_the_notification_area_of_large() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^parameter block is visible in the uncompressed$")
+	public void parameter_block_is_visible_in_the_uncompressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I restart the device$")
+	public void i_restart_the_device() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertNotSame(str1,str3);
+	}
+
+	@Then("^I should see the ultrasound disconnected technical alarm notification is not displayed$")
+	public void i_should_see_the_ultrasound_disconnected_technical_alarm_notification_is_not_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^parameter block is visible in the compressed$")
+	public void parameter_block_is_visible_in_the_compressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertNotSame(str1,str3);
+	}
+
+	@Given("^parameter block is visible in the large$")
+	public void parameter_block_is_visible_in_the_large() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertNotSame(str1,str3);
+	}
+
+	@Given("^ultrasound disconnection notification is displayed at notification area of uncompressed$")
+	public void ultrasound_disconnection_notification_is_displayed_at_notification_area_of_uncompressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertNotSame(str1,str3);
+		assertNotSame(str1,str2);
+	}
+
+	@Then("^I should see the disconnection notification disappears in (\\d+) second$")
+	public void i_should_see_the_disconnection_notification_disappears_in_second(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+		assertNotSame(str1,str3);
+	}
+
+	@Given("^ultrasound disconnection notification is displayed at notification area of compressed$")
+	public void ultrasound_disconnection_notification_is_displayed_at_notification_area_of_compressed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^ultrasound disconnection notification is displayed at notification area of large$")
+	public void ultrasound_disconnection_notification_is_displayed_at_notification_area_of_large() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I reconnect the ultrasound transducer after (\\d+) min$")
+	public void i_reconnect_the_ultrasound_transducer_after_min(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the ultrasound disconnection notification disappeared\\.$")
+	public void i_should_see_the_ultrasound_disconnection_notification_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^Attendant device is powered up$")
+	public void attendant_device_is_powered_up() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^the Monitoring  application is launched$")
+	public void the_Monitoring_application_is_launched() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^splashScreen displaying GE logo and company name at horizontally centred position and company name is in bold letters FC black font size (\\d+) pt$")
+	public void splashscreen_displaying_GE_logo_and_company_name_at_horizontally_centred_position_and_company_name_is_in_bold_letters_FC_black_font_size_pt(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^the splashScreen displaying product name and product version number below company name having text size (\\d+)pt and FC grey colour$")
+	public void the_splashScreen_displaying_product_name_and_product_version_number_below_company_name_having_text_size_pt_and_FC_grey_colour(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^the splash screen should be displayed for (\\d+) seconds$")
+	public void the_splash_screen_should_be_displayed_for_seconds(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the VSC screen$")
+	public void i_should_see_the_VSC_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^Attendant device is powered up, Eclipse is launched and device is connected to eclipse$")
+	public void attendant_device_is_powered_up_Eclipse_is_launched_and_device_is_connected_to_eclipse() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^DDMS option in IDE is selected$")
+	public void ddms_option_in_IDE_is_selected() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^System Information is selected$")
+	public void system_Information_is_selected() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^monitoring app in the chart of CPU load is highlighted$")
+	public void monitoring_app_in_the_chart_of_CPU_load_is_highlighted() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% during loading of splash screen$")
+	public void cpu_load_is_less_then_during_loading_of_splash_screen(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^transducer is connected to the US(\\d+) channel$")
+	public void transducer_is_connected_to_the_US_channel(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^the VSC scaled screen is currently being displayed$")
+	public void the_VSC_scaled_screen_is_currently_being_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I disconnect the transducer from the system$")
+	public void i_disconnect_the_transducer_from_the_system() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see high priority technical alarm notification is displayed at the bottom of the screen$")
+	public void i_should_see_high_priority_technical_alarm_notification_is_displayed_at_the_bottom_of_the_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^--- is displayed in the parameter block$")
+	public void is_displayed_in_the_parameter_block() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^audio beeps on$")
+	public void audio_beeps_on() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^audio silence button is displayed at the top of the VSC screen$")
+	public void audio_silence_button_is_displayed_at_the_top_of_the_VSC_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^high priority technical alarm symbol is displayed in the parameter block$")
+	public void high_priority_technical_alarm_symbol_is_displayed_in_the_parameter_block() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^when a technical alarm notification is displayed at the VSC screen$")
+	public void when_a_technical_alarm_notification_is_displayed_at_the_VSC_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I click on the technical alarm notification$")
+	public void i_click_on_the_technical_alarm_notification() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that the technical alarm notification remains displayed$")
+	public void i_should_see_that_the_technical_alarm_notification_remains_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^alarm notification message is displayed in the compressed screen mode$")
+	public void alarm_notification_message_is_displayed_in_the_compressed_screen_mode() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^the alarm message background color is red$")
+	public void the_alarm_message_background_color_is_red() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^foreground color is white$")
+	public void foreground_color_is_white() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^font size is (\\d+) sp$")
+	public void font_size_is_sp(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^font type is GE Inspira$")
+	public void font_type_is_GE_Inspira() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+
+
+	@When("^I click on the back button in the compressed screen in title bar$")
+	public void i_click_on_the_back_button_in_the_compressed_screen_in_title_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should be navigated to uncompressed screen$")
+	public void i_should_be_navigated_to_uncompressed_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see technical notification message at the bottom right corner of uncompressed screen$")
+	public void i_should_see_technical_notification_message_at_the_bottom_right_corner_of_uncompressed_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^when a transducer is disconnected$")
+	public void when_a_transducer_is_disconnected() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^technical alarm notification is displayed$")
+	public void technical_alarm_notification_is_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^transducer is reconnected And given input (\\d+) bpm$")
+	public void transducer_is_reconnected_And_given_input_bpm(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that notification message is disappeared$")
+	public void i_should_see_that_notification_message_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^silence button is disappeared$")
+	public void silence_button_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^(\\d+) bpm displayed in US(\\d+) parameter block$")
+	public void bpm_displayed_in_US_parameter_block(int arg1, int arg2) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^transducer is disconnected from the US(\\d+) channel$")
+	public void transducer_is_disconnected_from_the_US_channel(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^VSC scaled screen is currently being displayed$")
+	public void vsc_scaled_screen_is_currently_being_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I click on the alarm silence button$")
+	public void i_click_on_the_alarm_silence_button() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should not see alarm silence button$")
+	public void i_should_not_see_alarm_silence_button() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should not hear any alarm audio sound$")
+	public void i_should_not_hear_any_alarm_audio_sound() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^high priority audio silence icon displayed in the parameter block$")
+	public void high_priority_audio_silence_icon_displayed_in_the_parameter_block() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^device is powered up, Eclipse is launched and device is connected to eclipse$")
+	public void device_is_powered_up_Eclipse_is_launched_and_device_is_connected_to_eclipse() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^Monitoring application is launched$")
+	public void monitoring_application_is_launched() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+
+	@When("^select DDMS option in eclipse$")
+	public void select_DDMS_option_in_eclipse() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^select option System Information$")
+	public void select_option_System_Information() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^monitoring app in the chart is highlighted$")
+	public void monitoring_app_in_the_chart_is_highlighted() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% when US(\\d+) parameter block is displayed$")
+	public void cpu_load_is_less_then_when_US_parameter_block_is_displayed(int arg1, int arg2) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after display of high priority technical alarm at the bottom of the screen$")
+	public void cpu_load_is_less_then_after_display_of_high_priority_technical_alarm_at_the_bottom_of_the_screen(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^click on high priority technical alarm notification message$")
+	public void click_on_high_priority_technical_alarm_notification_message() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after is displayed after display of technical alarm notification screen with back button at the top$")
+	public void cpu_load_is_less_then_after_is_displayed_after_display_of_technical_alarm_notification_screen_with_back_button_at_the_top(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^VSC scaled screen is displayed$")
+	public void vsc_scaled_screen_is_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^acknowledge alarm silence button$")
+	public void acknowledge_alarm_silence_button() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% when high priority technical alarm notification is displayed$")
+	public void cpu_load_is_less_then_when_high_priority_technical_alarm_notification_is_displayed(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^alarm sound is not audible$")
+	public void alarm_sound_is_not_audible() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^reconnect the transducer$")
+	public void reconnect_the_transducer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after disappearance of technical alarm notification$")
+	public void cpu_load_is_less_then_after_disappearance_of_technical_alarm_notification(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^the monitoring application is launched$")
+	public void the_monitoring_application_is_launched() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^the printing is enabled$")
+	public void the_printing_is_enabled() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+
+	@Then("^I should see that self test pattern will be printed on (\\d+)-(\\d+) scale paper at (\\d+) cm/min$")
+	public void i_should_see_that_self_test_pattern_will_be_printed_on_scale_paper_at_cm_min(int arg1, int arg2, int arg3) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that FHR(\\d+) trend is printed for valid FHR range on (\\d+)-(\\d+) bpm scale paper at (\\d+) cm/min$")
+	public void i_should_see_that_FHR_trend_is_printed_for_valid_FHR_range_on_bpm_scale_paper_at_cm_min(int arg1, int arg2, int arg3, int arg4) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^the thickness of the FHR(\\d+) trend should be (\\d+) pixel thickness$")
+	public void the_thickness_of_the_FHR_trend_should_be_pixel_thickness(int arg1, int arg2) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^FHR(\\d+) input as (\\d+)$")
+	public void fhr_input_as(int arg1, int arg2) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that pen lift is printed$")
+	public void i_should_see_that_pen_lift_is_printed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^the SAM is docked to the printer$")
+	public void the_SAM_is_docked_to_the_printer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^printer contains paper$")
+	public void printer_contains_paper() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I long press the printer paper advance button$")
+	public void i_long_press_the_printer_paper_advance_button() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that printer advances the paper at (\\d+) cm/min$")
+	public void i_should_see_that_printer_advances_the_paper_at_cm_min(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I release the paper advance button$")
+	public void i_release_the_paper_advance_button() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that printing will be resumed$")
+	public void i_should_see_that_printing_will_be_resumed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^data being printed will be from the time the button was released$")
+	public void data_being_printed_will_be_from_the_time_the_button_was_released() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that printer connect icon is displayed in system indicator bar$")
+	public void i_should_see_that_printer_connect_icon_is_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I undocked the printer from SAM$")
+	public void i_undocked_the_printer_from_SAM() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the low priority technical alarm with blue color border$")
+	public void i_should_see_the_low_priority_technical_alarm_with_blue_color_border() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^printer disconnected technical alarm notification should be displayed$")
+	public void printer_disconnected_technical_alarm_notification_should_be_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^printer disconnect icon should displayed in system indicator bar$")
+	public void printer_disconnect_icon_should_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should hear appropriate alarm audio sound$")
+	public void i_should_hear_appropriate_alarm_audio_sound() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^again SAM is docked to the printer$")
+	public void again_SAM_is_docked_to_the_printer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the low priority technical alarm is disappeared$")
+	public void i_should_see_the_low_priority_technical_alarm_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that screen border go back to original$")
+	public void i_should_see_that_screen_border_go_back_to_original() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^printer disconnected notification is disappeared$")
+	public void printer_disconnected_notification_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^printer connect icon should displayed in system indicator bar$")
+	public void printer_connect_icon_should_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^audio silence button is disappeared$")
+	public void audio_silence_button_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^(\\d+) pages are remaining in printer$")
+	public void pages_are_remaining_in_printer(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper low technical alarm notification should be displayed$")
+	public void paper_low_technical_alarm_notification_should_be_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper low icon should displayed in system indicator bar$")
+	public void paper_low_icon_should_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^I click on the printer status icon$")
+	public void i_click_on_the_printer_status_icon() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the printer settings screen$")
+	public void i_should_see_the_printer_settings_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that paper low is updated in printer notification area$")
+	public void i_should_see_that_paper_low_is_updated_in_printer_notification_area() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that Printer paper type and speed is properly updated in settings screen$")
+	public void i_should_see_that_Printer_paper_type_and_speed_is_properly_updated_in_settings_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the technical alarm screen$")
+	public void i_should_see_the_technical_alarm_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that re alarm happens for (\\d+) seconds with (\\d+) seconds interval$")
+	public void i_should_see_that_re_alarm_happens_for_seconds_with_seconds_interval(int arg1, int arg2) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^user put enough paper$")
+	public void user_put_enough_paper() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper low notification is disappeared$")
+	public void paper_low_notification_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^Printer icon should be update in system indicator bar$")
+	public void printer_icon_should_be_update_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^printer sends paper out command$")
+	public void printer_sends_paper_out_command() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper out technical alarm notification should be displayed$")
+	public void paper_out_technical_alarm_notification_should_be_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper out icon should displayed in system indicator bar$")
+	public void paper_out_icon_should_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that paper out is updated in printer notification area$")
+	public void i_should_see_that_paper_out_is_updated_in_printer_notification_area() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that printer paper type and speed is properly updated in settings screen$")
+	public void i_should_see_that_printer_paper_type_and_speed_is_properly_updated_in_settings_screen() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^user put paper$")
+	public void user_put_paper() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^paper out notification is disappeared$")
+	public void paper_out_notification_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+
+
+	@When("^printer door is open$")
+	public void printer_door_is_open() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^door open technical alarm notification should be displayed$")
+	public void door_open_technical_alarm_notification_should_be_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^door open icon should displayed in system indicator bar$")
+	public void door_open_icon_should_displayed_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that door open is updated in printer notification area$")
+	public void i_should_see_that_door_open_is_updated_in_printer_notification_area() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^printer door is closed$")
+	public void printer_door_is_closed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^door open notification is disappeared$")
+	public void door_open_notification_is_disappeared() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^the SAM is undocked from the printer$")
+	public void the_SAM_is_undocked_from_the_printer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^alarms are enabled$")
+	public void alarms_are_enabled() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the alarm values <threshold value> are displayed$")
+	public void i_should_see_the_alarm_values_threshold_value_are_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@When("^FHR(\\d+) input as <fhrlowthresholdvalue>$")
+	public void fhr_input_as_fhrlowthresholdvalue(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that physiological alarm with right priority displayed with appropriate icons and FHR(\\d+) parameter block$")
+	public void i_should_see_that_physiological_alarm_with_right_priority_displayed_with_appropriate_icons_and_FHR_parameter_block(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see that appropriate screen border is displayed$")
+	public void i_should_see_that_appropriate_screen_border_is_displayed() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see the appropriate alarm silence button at the top$")
+	public void i_should_see_the_appropriate_alarm_silence_button_at_the_top() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^I should see appropriate alarm silence button with timer$")
+	public void i_should_see_appropriate_alarm_silence_button_with_timer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Given("^SAM is docked to the printer$")
+	public void sam_is_docked_to_the_printer() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after display of VSC screen$")
+	public void cpu_load_is_less_then_after_display_of_VSC_screen(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% while display of door open technical alarm notification$")
+	public void cpu_load_is_less_then_while_display_of_door_open_technical_alarm_notification(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% while display of low priority technical alarm notification with blue border$")
+	public void cpu_load_is_less_then_while_display_of_low_priority_technical_alarm_notification_with_blue_border(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after display paper out technical alarm notification$")
+	public void cpu_load_is_less_then_after_display_paper_out_technical_alarm_notification(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^CPU load is less then (\\d+)% after display of printer disconnected technical alarm notification$")
+	public void cpu_load_is_less_then_after_display_of_printer_disconnected_technical_alarm_notification(int arg1) throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+	@Then("^printer disconnect icon in system indicator bar$")
+	public void printer_disconnect_icon_in_system_indicator_bar() throws Throwable {
+	    // Write code here that turns the phrase above into concrete actions
+	    
+	}
+
+}
+
+POM.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+		    <groupId>CucumberTest</groupId>
+	    <artifactId>demo</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	 <dependencies>
+	        <dependency>
+			<groupId>info.cukes</groupId>
+			<artifactId>cucumber-java</artifactId>
+			<version>1.1.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>info.cukes</groupId>
+			<artifactId>cucumber-jvm</artifactId>
+			<version>1.1.5</version>
+			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>info.cukes</groupId>
+			<artifactId>cucumber-junit</artifactId>
+			<version>1.1.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.cobertura</groupId>
+			<artifactId>cobertura</artifactId>
+			<version>2.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>info.cukes</groupId>
+			<artifactId>cucumber-jvm-deps</artifactId>
+			<version>1.0.5</version>
+		</dependency>
+		<dependency>
+			<groupId>net.masterthought</groupId>
+			<artifactId>cucumber-reporting</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>info.cukes</groupId>
+			<artifactId>gherkin</artifactId>
+			<version>2.12.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>2.0.2-beta</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
+
+
+Execute:
+"C:\Program Files\Java\jre1.8.0_101\bin\javaw.exe" -Dfile.encoding=Cp1252 -classpath D:\SquishWorkspace\BDD\bin;D:\SquishWorkspace\BDD\Lib\cucumber-core-1.2.4.jar;D:\SquishWorkspace\BDD\Lib\cucumber-html-0.2.3.jar;D:\SquishWorkspace\BDD\Lib\cucumber-junit-1.2.4.jar;D:\SquishWorkspace\BDD\Lib\cucumber-jvm-deps-1.0.5.jar;D:\SquishWorkspace\BDD\Lib\gherkin-2.12.2.jar;D:\SquishWorkspace\BDD\Lib\hamcrest-all.jar;D:\SquishWorkspace\BDD\Lib\junit-4.12.jar;D:\SquishWorkspace\BDD\Lib\cucumber-java-1.2.4.jar;/D:/ProgApps/Eclipse/configuration/org.eclipse.osgi/453/0/.cp/;/D:/ProgApps/Eclipse/configuration/org.eclipse.osgi/452/0/.cp/ org.eclipse.jdt.internal.junit.runner.RemoteTestRunner -version 3 -port 51593 -testLoaderClass org.eclipse.jdt.internal.junit4.runner.JUnit4TestLoader -loaderpluginname org.eclipse.jdt.junit4.runtime -classNames CucumberTest.TestRunner
